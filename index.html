@@ -1,51 +1,60 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light" data-mode="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClipViral AI · Viral clips on Android</title>
-  <meta name="description" content="Turn YouTube videos, live streams, and camera clips into vertical shorts directly on Android. AI vision, YouTube heatmaps, animated captions, and local Media3 GPU rendering.">
-  <meta name="theme-color" content="#151515" id="themeColorMeta">
-  <meta name="author" content="Daniil Burykin">
-  <link rel="canonical" href="https://clipviral.jebus.bond/">
-
-  <!-- Favicons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-
-  <!-- Open Graph -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ClipViral</title>
+  <meta name="description" content="ClipViral, an Android app for turning long videos into vertical clips. YouTube heatmaps, AI vision, animated captions, and local Media3 GPU rendering.">
+  <meta name="theme-color" content="#fbfbfb" id="themeColorMeta">
+  <meta property="og:title" content="ClipViral">
+  <meta property="og:description" content="Long videos into vertical clips, right on Android.">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="ClipViral AI">
-  <meta property="og:title" content="ClipViral AI · Viral clips on Android">
-  <meta property="og:description" content="Drop a YouTube link, live stream, or camera video. ClipViral finds peak moments with AI vision and heatmaps, adds animated captions, and renders locally on your phone GPU.">
   <meta property="og:url" content="https://clipviral.jebus.bond/">
   <meta property="og:image" content="https://clipviral.jebus.bond/assets/og.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="ClipViral AI on Android with interactive 3D play button icon">
-
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ClipViral AI · Viral clips on Android">
-  <meta name="twitter:description" content="On-device Media3 GPU rendering, YouTube heatmaps, SponsorBlock skip, and animated captions. Download ClipViral.apk v3.0.1.">
+  <meta name="twitter:title" content="ClipViral">
+  <meta name="twitter:description" content="Long videos into vertical clips, right on Android.">
   <meta name="twitter:image" content="https://clipviral.jebus.bond/assets/og.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="./assets/favicon-64.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
+  <link rel="canonical" href="https://clipviral.jebus.bond/">
 
-  <!-- Prevent theme flash before paint -->
+  <!-- Zero-flash theme, language, and font+logo animation guard (html.fw) -->
   <script>
     (function () {
-      try {
-        var saved = localStorage.getItem("clipviral-theme");
-        if (saved === "light" || saved === "dark") {
-          document.documentElement.setAttribute("data-theme", saved);
-          var meta = document.getElementById("themeColorMeta");
-          if (meta) meta.setAttribute("content", saved === "light" ? "#f1f1f1" : "#151515");
-        }
-      } catch (_e) {}
+      var doc = document.documentElement;
+      var savedTheme = null;
+      try { savedTheme = localStorage.getItem("clipviral-theme"); } catch (e) {}
+      var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var theme = (savedTheme === "dark" || savedTheme === "light") ? savedTheme : (prefersDark ? "dark" : "light");
+      doc.setAttribute("data-theme", theme);
+      doc.setAttribute("data-mode", theme);
+      var meta = document.getElementById("themeColorMeta");
+      if (meta) meta.setAttribute("content", theme === "dark" ? "#141414" : "#fbfbfb");
+
+      var savedLang = null;
+      try { savedLang = localStorage.getItem("clipviral-lang"); } catch (e) {}
+      var lang = (savedLang === "ru" || savedLang === "en")
+        ? savedLang
+        : (/^(ru|uk|be|kk)/i.test(navigator.language || "") ? "ru" : "en");
+      doc.setAttribute("lang", lang);
+
+      var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduced) {
+        doc.classList.add("fw");
+        window.__clipviralFwTimer = setTimeout(function () {
+          doc.classList.remove("fw");
+        }, 4000);
+      }
     })();
   </script>
 
-  <!-- Three.js r186 Import Map -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=JetBrains+Mono:wght@500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+
   <script type="importmap">
     {
       "imports": {
@@ -54,817 +63,217 @@
       }
     }
   </script>
-
-  <!-- Fonts: Inter + JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#features" data-i18n="skip">Skip to content</a>
 
-  <!-- 1. Minimal Top Bar -->
-  <header class="topbar" id="top">
-    <div class="shell topbar-inner">
-      <a href="#top" class="brand" aria-label="ClipViral AI home">
-        <img src="assets/app-icon.png" width="28" height="28" alt="" class="brand-icon">
-        <span class="brand-name">ClipViral</span>
-      </a>
+  <!-- Required SVG Goo Filters (#goo nav, #goo-b 20-card grid, #goo-p 4-tile grid) -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <defs>
+      <filter id="goo" x="-10%" y="-40%" width="120%" height="180%" color-interpolation-filters="sRGB">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b" />
+        <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" />
+      </filter>
+      <filter id="goo-b" x="-3%" y="-3%" width="106%" height="106%" color-interpolation-filters="sRGB">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b" />
+        <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" />
+      </filter>
+      <filter id="goo-p" x="-3%" y="-3%" width="106%" height="106%" color-interpolation-filters="sRGB">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b" />
+        <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" />
+      </filter>
+    </defs>
+  </svg>
 
-      <nav class="nav-links" aria-label="Primary navigation">
-        <a href="#studio">Studio</a>
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#install">Install</a>
-      </nav>
+  <!-- Fixed Scroll Blades (top & bottom 72px backdrop blur) -->
+  <div class="blur blur-top" id="blurTop" aria-hidden="true"></div>
+  <div class="blur blur-bottom" id="blurBottom" aria-hidden="true"></div>
 
-      <div class="topbar-actions">
-        <button
-          type="button"
-          class="round-btn round-btn-page"
-          id="themeToggle"
-          aria-label="Switch to light theme"
-          aria-pressed="false"
-          title="Toggle theme"
-        >
-          <svg class="icon-sun" width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <circle cx="10" cy="10" r="3.6" stroke="currentColor" stroke-width="1.6"/>
-            <path d="M10 2.5v1.8M10 15.7v1.8M2.5 10h1.8M15.7 10h1.8M4.7 4.7l1.3 1.3M14 14l1.3 1.3M15.3 4.7L14 6M6 14l-1.3 1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-          <svg class="icon-moon" width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true" hidden>
-            <path d="M16.2 12.6A6.8 6.8 0 017.4 3.8a6.8 6.8 0 108.8 8.8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-          </svg>
-        </button>
-
-        <a class="pill-btn pill-primary pill-sm topbar-download" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M8 2.25v7.5m0 0L4.75 6.5M8 9.75L11.25 6.5M2.75 12.75h10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span>Download APK</span>
-        </a>
-
-        <button
-          type="button"
-          class="round-btn round-btn-page mobile-menu-btn"
-          id="mobileMenuBtn"
-          aria-expanded="false"
-          aria-controls="mobileNav"
-          aria-label="Open menu"
-        >
-          <span class="menu-bar"></span>
-          <span class="menu-bar"></span>
-        </button>
+  <!-- Fixed Goo-Welded 3-Pill Navigation -->
+  <header class="nav" id="mainNav">
+    <div class="nav-row nav-bg" aria-hidden="true">
+      <span class="n-seal"></span>
+      <div class="n-links">
+        <span class="n-in">
+          <span class="bg-link" data-i18n="navFeatures">Features</span>
+          <span class="bg-link" data-i18n="navEngine">Engine</span>
+        </span>
       </div>
+      <span class="n-dl"><span class="n-in">GitHub</span></span>
     </div>
 
-    <div class="shell">
-      <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" hidden>
-        <a href="#studio" class="mobile-nav-link">Studio</a>
-        <a href="#features" class="mobile-nav-link">Features</a>
-        <a href="#pricing" class="mobile-nav-link">Pricing</a>
-        <a href="#install" class="mobile-nav-link">Install</a>
-        <a class="pill-btn pill-primary pill-lg mobile-nav-cta" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
-          Download APK · 21 MB
-        </a>
+    <div class="nav-row nav-fg">
+      <a class="n-seal" href="#top" aria-label="ClipViral">
+        <svg class="seal" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <circle cx="22" cy="22" r="20.5" stroke="var(--seal-ring)" stroke-width="1.6" />
+          <circle cx="22" cy="22" r="16.5" stroke="var(--seal-ring)" stroke-width="0.9" stroke-dasharray="2.4 3.2" />
+          <path d="M17.5 14.8L29.6 22L17.5 29.2V14.8Z" fill="var(--seal-mark)" />
+          <path d="M29.8 11.4L30.8 14L33.4 15L30.8 16L29.8 18.6L28.8 16L26.2 15L28.8 14L29.8 11.4Z" fill="var(--seal-mark)" />
+        </svg>
+      </a>
+      <nav class="n-links" aria-label="Primary">
+        <span class="n-in">
+          <a href="#features" data-i18n="navFeatures">Features</a>
+          <a href="#engine" data-i18n="navEngine">Engine</a>
+        </span>
       </nav>
+      <a class="n-dl" href="https://github.com/dandysuper/clipviral-site" target="_blank" rel="noopener noreferrer">
+        <span class="n-in">GitHub</span>
+      </a>
     </div>
   </header>
 
-  <main id="main" class="shell page-stack">
-    <!-- 2. Hero Window -->
-    <section class="moka-window hero-window" aria-labelledby="hero-heading">
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <div class="status-badge">
-            <span class="status-dot" aria-hidden="true"></span>
-            <span>v3.0.1 · Android 8.0+ · Free to start</span>
-          </div>
+  <!-- Fixed Top-Right Controls (Language + Theme) -->
+  <div class="ctrls">
+    <div class="ctrl">
+      <button type="button" id="langToggle" aria-label="Language">
+        <span class="lang-code" id="langCode">EN</span>
+      </button>
+    </div>
+    <div class="ctrl">
+      <button type="button" id="themeToggle" aria-label="Theme" aria-pressed="false">
+        <svg class="theme-ico icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+          <circle cx="12" cy="12" r="4.2"/>
+          <path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/>
+        </svg>
+        <svg class="theme-ico icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.4 14.5A8.5 8.5 0 0 1 9.5 3.6a8.5 8.5 0 1 0 10.9 10.9Z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 
-          <h1 id="hero-heading" class="hero-title">Viral clips on Android</h1>
-
-          <p class="hero-desc">
-            Drop a YouTube link, live stream, or camera video. ClipViral finds peak moments with AI vision and heatmaps, adds animated captions, and renders locally on your phone GPU.
-          </p>
-
-          <div class="action-row">
-            <a class="pill-btn pill-primary pill-lg" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M8 2v8m0 0L4.5 6.5M8 10l3.5-3.5M2.5 13h11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>Download APK</span>
-            </a>
-
-            <a class="pill-btn pill-light pill-lg" href="#studio">
-              <span>Try Clip Studio</span>
-            </a>
-          </div>
-
-          <p class="hero-meta">21 MB · Media3 GPU · TikTok, Reels, Shorts</p>
+  <main>
+    <!-- 1. HERO -->
+    <section class="hero" id="top">
+      <div class="rays rays-l" aria-hidden="true">
+        <div class="side-rays">
+          <canvas class="side-rays__canvas" id="raysLeft"></canvas>
         </div>
+      </div>
+      <div class="rays rays-r" aria-hidden="true">
+        <div class="side-rays">
+          <canvas class="side-rays__canvas" id="raysRight"></canvas>
+        </div>
+      </div>
 
-        <!-- Centerpiece: Interactive Three.js 3D Play-Button Icon -->
-        <div class="moka-card icon3d-card" id="icon3dCard">
-          <div class="icon3d-top-bar">
-            <span class="icon3d-chip" id="burstStatus" aria-live="polite">
-              <span class="icon3d-chip-dot" aria-hidden="true"></span>
-              <span id="burstStatusText">Interactive 3D icon</span>
-            </span>
-          </div>
-
-          <div class="icon3d-stage" id="icon3dStage">
-            <img
-              src="assets/app-icon.png"
-              width="192"
-              height="192"
-              alt="ClipViral AI app icon"
-              class="icon3d-fallback"
-              data-icon3d-fallback
-              hidden
-            >
-          </div>
-
-          <div class="icon3d-footer">
-            <span class="icon3d-hint" id="icon3dHint">Click play or drag to orbit</span>
-            <div class="icon3d-controls" id="icon3dControls">
-              <button
-                type="button"
-                class="round-btn round-btn-card"
-                id="playBurstBtn"
-                aria-label="Play 3D burst animation"
-                title="Play burst"
-              >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                  <path d="M4.2 2.8l9.2 5.2-9.2 5.2V2.8z"/>
-                </svg>
-              </button>
-              <button
-                type="button"
-                class="round-btn round-btn-card"
-                id="resetViewBtn"
-                aria-label="Reset 3D icon angle"
-                title="Reset view"
-              >
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M3.2 8a4.8 4.8 0 101.4-3.4L3 6.2M3 3.2v3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
+      <div class="hero-in">
+        <div class="logo">
+          <div class="logo-tilt">
+            <div class="metal" id="icon3dStage">
+              <img class="poster" data-icon3d-fallback src="./assets/app-icon.png" alt="ClipViral" width="512" height="512" hidden>
             </div>
           </div>
+        </div>
+
+        <h1 aria-label="ClipViral">
+          <span class="ch" aria-hidden="true" style="--i:0"><span>C</span></span>
+          <span class="ch" aria-hidden="true" style="--i:1"><span>l</span></span>
+          <span class="ch" aria-hidden="true" style="--i:2"><span>i</span></span>
+          <span class="ch" aria-hidden="true" style="--i:3"><span>p</span></span>
+          <span class="ch" aria-hidden="true" style="--i:4"><span>V</span></span>
+          <span class="ch" aria-hidden="true" style="--i:5"><span>i</span></span>
+          <span class="ch" aria-hidden="true" style="--i:6"><span>r</span></span>
+          <span class="ch" aria-hidden="true" style="--i:7"><span>a</span></span>
+          <span class="ch" aria-hidden="true" style="--i:8"><span>l</span></span>
+        </h1>
+
+        <p class="lead a-up" style="--d:.95s" data-i18n="lead">Long videos into vertical clips, right on Android.</p>
+
+        <div class="a-up" style="--d:1.15s">
+          <a class="moka-btn" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 4v11.5M7.5 11.5L12 16l4.5-4.5M5 19.5h14"/>
+            </svg>
+            <span data-i18n="heroBtn">Download</span>
+          </a>
+        </div>
+
+        <div class="a-up hero-code" style="--d:1.25s">
+          <a class="hero-code-link" href="https://github.com/dandysuper/clipviral-site/releases" target="_blank" rel="noopener noreferrer">
+            <svg class="hero-code-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.54 2.87 8.39 6.84 9.75.5.09.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.9 1.57 2.36 1.12 2.94.86.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.08 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.05A9.3 9.3 0 0 1 12 6.84c.85 0 1.71.12 2.51.35 1.91-1.32 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.64 1.03 2.76 0 3.95-2.34 4.82-4.57 5.07.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.59.69.49A10.26 10.26 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z"/>
+            </svg>
+            <span data-i18n="heroCodeBtn">Check releases</span>
+            <svg class="hero-code-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 3.5L10.5 8L6 12.5"/>
+            </svg>
+          </a>
         </div>
       </div>
     </section>
 
-    <!-- 3. Interactive Clip Studio Window -->
-    <section class="moka-window studio-window" id="studio" aria-labelledby="studio-heading">
-      <div class="window-head">
-        <h2 id="studio-heading" class="window-title">Clip Studio</h2>
-        <p class="window-sub">Live 9:16 preview with real app presets</p>
+    <!-- 2. FEATURES (4x5 = 20 Goo-Blob Grid) -->
+    <section class="bento" id="features">
+      <div class="bento-bg" aria-hidden="true">
+        <div class="wash wash-a"></div>
       </div>
 
-      <div class="studio-grid">
-        <!-- Left: 9:16 Video Preview Card -->
-        <div class="moka-card preview-card">
-          <div class="preview-viewport" id="previewViewport">
-            <img
-              src="assets/clip-preview.jpg"
-              width="768"
-              height="1376"
-              alt="Creator speaking into a studio microphone in a vertical 9:16 clip preview"
-              class="preview-frame-img"
-              id="previewFrameImg"
-            >
-            <div class="preview-scrim-top" aria-hidden="true"></div>
-            <div class="preview-scrim-bottom" aria-hidden="true"></div>
+      <h2 class="bento-h rv" data-i18n="featTitle">What's inside</h2>
 
-            <!-- Top HUD inside preview -->
-            <div class="preview-hud">
-              <span class="preview-chip">9:16 Fill · 720p</span>
-              <span class="preview-score" id="previewScoreBadge" aria-label="Viral score">
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                  <path d="M8.85 1.45c.1 2.2-1.4 3.45-2.3 4.45-.85.95-1.55 2.05-1.55 3.6 0 2.05 1.65 3.7 3.7 3.7 2.25 0 3.8-1.8 3.8-4.15 0-2.65-1.5-5.3-3.65-7.6z"/>
-                </svg>
-                <span id="previewScoreVal">94</span>
-              </span>
-            </div>
+      <div class="bento-grid" id="bentoGrid">
+        <div class="layer goo" id="bentoGooLayer" aria-hidden="true"></div>
+        <div class="layer" id="bentoContentLayer"></div>
+      </div>
 
-            <!-- Top Hook Banner -->
-            <div class="hook-banner" id="hookBanner" aria-live="polite">
-              WHY 90% OF SHORTS DIE AT 0:03
-            </div>
+      <button type="button" class="bento-more" id="bentoMoreBtn" aria-expanded="false">Show all 20</button>
+    </section>
 
-            <!-- Animated Captions -->
-            <div class="caption-stage style-karaoke" id="captionStage" aria-live="polite"></div>
+    <!-- 3. ENGINE & PRO (12-Col 4-Tile Goo Grid) -->
+    <section class="plug" id="engine">
+      <div class="plug-head">
+        <h2 class="bento-h rv" data-i18n="engineTitle">Engine &amp; Pro</h2>
+        <p class="lead" data-i18n="engineLead">Built to cut, caption, and post straight from your phone.</p>
+      </div>
 
-            <!-- Bottom preview bar -->
-            <div class="preview-bottom-meta">
-              <button
-                type="button"
-                class="preview-play-btn"
-                id="playbackToggle"
-                aria-pressed="false"
-                aria-label="Pause caption playback"
-                title="Pause playback"
-              >
-                <svg class="icon-pause" width="11" height="11" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
-                  <rect x="2.2" y="1.8" width="2.4" height="8.4" rx="0.8"/>
-                  <rect x="7.4" y="1.8" width="2.4" height="8.4" rx="0.8"/>
-                </svg>
-                <svg class="icon-play" width="11" height="11" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true" hidden>
-                  <path d="M3 1.8l7.2 4.2L3 10.2V1.8z"/>
-                </svg>
-                <span id="playbackLabel">Playing</span>
-              </button>
-              <span class="preview-watermark">@clipviral.app</span>
-            </div>
-
-            <div class="preview-progress-track" aria-hidden="true">
-              <div class="preview-progress-fill" id="progressFill"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Stacked Moka Control Cards -->
-        <div class="studio-controls">
-          <!-- Card A: Detected Peaks -->
-          <div class="moka-card control-card">
-            <div class="card-head-row">
-              <h3 class="card-title">Detected Peaks</h3>
-              <span class="mono-meta" id="clipTimecode">04:18 to 05:02</span>
-            </div>
-
-            <div class="heatmap-wrap" id="heatmapWrap">
-              <div class="heatmap-canvas-box">
-                <svg class="heatmap-svg" viewBox="0 0 560 96" preserveAspectRatio="none" fill="none" role="img" aria-label="YouTube Most Replayed curve with three detected peaks">
-                  <defs>
-                    <linearGradient id="mokaHeatFill" x1="0" y1="0" x2="0" y2="96" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stop-color="currentColor" stop-opacity="0.14"/>
-                      <stop offset="100%" stop-color="currentColor" stop-opacity="0.01"/>
-                    </linearGradient>
-                  </defs>
-
-                  <!-- Subtle SponsorBlock skip zone -->
-                  <rect id="sponsorZoneRect" class="heatmap-skip-band" x="204" y="8" width="58" height="80" rx="6"/>
-
-                  <!-- Quiet Neutral Retention Curve -->
-                  <path d="M0 80 C32 77, 56 64, 80 36 C100 14, 116 14, 136 38 C156 62, 176 72, 204 74 L262 74 C288 68, 308 32, 332 22 C356 14, 376 48, 404 64 C432 75, 452 44, 476 28 C500 16, 524 50, 560 72 L560 92 L0 92 Z" fill="url(#mokaHeatFill)"/>
-                  <path class="heatmap-curve" d="M0 80 C32 77, 56 64, 80 36 C100 14, 116 14, 136 38 C156 62, 176 72, 204 74 L262 74 C288 68, 308 32, 332 22 C356 14, 376 48, 404 64 C432 75, 452 44, 476 28 C500 16, 524 50, 560 72" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-
-                  <!-- Active Peak Selection Bracket (accent blue only on active selection) -->
-                  <rect id="heatmapBracket" x="68" y="8" width="82" height="80" rx="8" fill="rgba(10, 132, 255, 0.12)" stroke="#0a84ff" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-                </svg>
-
-                <!-- Crisp Fixed-Pixel HTML Overlays (never distorted or bloated at 1440) -->
-                <span class="heatmap-skip-label" id="sponsorZoneText" aria-hidden="true">SKIP</span>
-                <button type="button" class="heatmap-pin is-active" data-peak-dot="0" style="left: 19.4%; top: 20%;" aria-label="Select peak 1 at 04:18, score 94"></button>
-                <button type="button" class="heatmap-pin" data-peak-dot="1" style="left: 59.5%; top: 22.5%;" aria-label="Select peak 2 at 11:42, score 91"></button>
-                <button type="button" class="heatmap-pin" data-peak-dot="2" style="left: 85.4%; top: 27%;" aria-label="Select peak 3 at 18:05, score 88"></button>
-              </div>
-            </div>
-
-            <div class="peak-pills" role="tablist" aria-label="Detected viral peaks">
-              <button type="button" class="seg-pill is-active" role="tab" aria-selected="true" tabindex="0" data-clip-index="0">
-                <span>04:18</span>
-                <span class="seg-score">94</span>
-              </button>
-              <button type="button" class="seg-pill" role="tab" aria-selected="false" tabindex="-1" data-clip-index="1">
-                <span>11:42</span>
-                <span class="seg-score">91</span>
-              </button>
-              <button type="button" class="seg-pill" role="tab" aria-selected="false" tabindex="-1" data-clip-index="2">
-                <span>18:05</span>
-                <span class="seg-score">88</span>
-              </button>
-            </div>
-
-            <div class="score-bars">
-              <div class="score-bar-row">
-                <span class="score-bar-label">Hook</span>
-                <div class="score-track"><div class="score-fill" id="barHook" style="width: 96%"></div></div>
-                <span class="score-bar-val" id="valHook">96</span>
-              </div>
-              <div class="score-bar-row">
-                <span class="score-bar-label">Retention</span>
-                <div class="score-track"><div class="score-fill" id="barRetention" style="width: 94%"></div></div>
-                <span class="score-bar-val" id="valRetention">94</span>
-              </div>
-              <div class="score-bar-row">
-                <span class="score-bar-label">Shareability</span>
-                <div class="score-track"><div class="score-fill" id="barShare" style="width: 92%"></div></div>
-                <span class="score-bar-val" id="valShare">92</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card B: Caption Style -->
-          <div class="moka-card control-card">
-            <div class="card-head-row">
-              <h3 class="card-title">Caption Style</h3>
-              <span class="mono-meta" id="activeStyleMeta">Word pop</span>
-            </div>
-
-            <div class="style-pills" role="tablist" aria-label="Caption styles">
-              <button type="button" class="seg-pill is-active" role="tab" aria-selected="true" tabindex="0" data-caption-style="karaoke">Karaoke Pop</button>
-              <button type="button" class="seg-pill" role="tab" aria-selected="false" tabindex="-1" data-caption-style="boxed">Dark Pill</button>
-              <button type="button" class="seg-pill" role="tab" aria-selected="false" tabindex="-1" data-caption-style="classic">Bold Outline</button>
-              <button type="button" class="seg-pill" role="tab" aria-selected="false" tabindex="-1" data-caption-style="neon">Neon Glow</button>
-            </div>
-          </div>
-
-          <!-- Card C: Render Options with Authentic 40x24 Growing-Thumb M3 Switches -->
-          <div class="moka-card control-card">
-            <div class="card-head-row">
-              <h3 class="card-title">Render Options</h3>
-              <span class="mono-meta">Live toggle</span>
-            </div>
-
-            <div class="switch-list">
-              <label class="switch-row" for="swSponsor">
-                <span class="switch-text">
-                  <span class="switch-label">SponsorBlock skip</span>
-                  <span class="switch-sub">Exclude ad reads from peaks</span>
-                </span>
-                <span class="m3-switch">
-                  <input type="checkbox" id="swSponsor" checked>
-                  <span class="m3-track">
-                    <svg class="m3-track-ring" viewBox="0 0 40 24" aria-hidden="true">
-                      <rect x="0.8" y="0.8" width="38.4" height="22.4" rx="11.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
-                    </svg>
-                    <span class="m3-thumb"></span>
-                  </span>
-                </span>
-              </label>
-
-              <label class="switch-row" for="swCaptions">
-                <span class="switch-text">
-                  <span class="switch-label">Animated captions</span>
-                  <span class="switch-sub">Burn timed captions onto frame</span>
-                </span>
-                <span class="m3-switch">
-                  <input type="checkbox" id="swCaptions" checked>
-                  <span class="m3-track">
-                    <svg class="m3-track-ring" viewBox="0 0 40 24" aria-hidden="true">
-                      <rect x="0.8" y="0.8" width="38.4" height="22.4" rx="11.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
-                    </svg>
-                    <span class="m3-thumb"></span>
-                  </span>
-                </span>
-              </label>
-
-              <label class="switch-row" for="swBanner">
-                <span class="switch-text">
-                  <span class="switch-label">Top hook banner</span>
-                  <span class="switch-sub">Show title bar above subject</span>
-                </span>
-                <span class="m3-switch">
-                  <input type="checkbox" id="swBanner" checked>
-                  <span class="m3-track">
-                    <svg class="m3-track-ring" viewBox="0 0 40 24" aria-hidden="true">
-                      <rect x="0.8" y="0.8" width="38.4" height="22.4" rx="11.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
-                    </svg>
-                    <span class="m3-thumb"></span>
-                  </span>
-                </span>
-              </label>
-
-              <label class="switch-row" for="swMirror">
-                <span class="switch-text">
-                  <span class="switch-label">Anti-copyright mirror</span>
-                  <span class="switch-sub">Flip video horizontally on export</span>
-                </span>
-                <span class="m3-switch">
-                  <input type="checkbox" id="swMirror">
-                  <span class="m3-track">
-                    <svg class="m3-track-ring" viewBox="0 0 40 24" aria-hidden="true">
-                      <rect x="0.8" y="0.8" width="38.4" height="22.4" rx="11.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
-                    </svg>
-                    <span class="m3-thumb"></span>
-                  </span>
-                </span>
-              </label>
-            </div>
-          </div>
-        </div>
+      <div class="pgrid" id="engineGrid">
+        <div class="pg goo" id="engineGooLayer" aria-hidden="true"></div>
+        <div class="pg" id="engineContentLayer"></div>
       </div>
     </section>
 
-    <!-- 4. Workflow & Capabilities Window -->
-    <section class="moka-window features-window" id="features" aria-labelledby="workflow-heading">
-      <div class="window-head">
-        <h2 id="workflow-heading" class="window-title">How it works</h2>
-        <p class="window-sub">Three local steps from source video to vertical post.</p>
-      </div>
-
-      <ol class="steps-grid">
-        <li class="moka-card step-card">
-          <span class="step-num">01</span>
-          <h3 class="card-title">Drop a source</h3>
-          <p class="card-text">
-            Paste a YouTube link, live stream, or <code>.m3u8</code> URL. You can also pick local files, attach an <code>.srt</code>, or share directly from the YouTube app.
-          </p>
-        </li>
-
-        <li class="moka-card step-card">
-          <span class="step-num">02</span>
-          <h3 class="card-title">Find viral peaks</h3>
-          <p class="card-text">
-            YouTube Most Replayed curves, SponsorBlock skip, audio peaks, and vision AI score each moment on Hook, Retention, and Shareability.
-          </p>
-        </li>
-
-        <li class="moka-card step-card">
-          <span class="step-num">03</span>
-          <h3 class="card-title">Render and post</h3>
-          <p class="card-text">
-            Export with zero-reencode Instant Cut or Media3 GPU rendering, then share straight to TikTok, Reels, Shorts, Facebook, X, and Threads.
-          </p>
-        </li>
-      </ol>
-
-      <div class="window-head window-head-sub">
-        <h2 class="window-title">Built for speed</h2>
-        <p class="window-sub">Native Android pipelines with built-in AI vision models.</p>
-      </div>
-
-      <div class="caps-grid">
-        <!-- Capability 1: AI Vision Models -->
-        <article class="moka-card cap-card">
-          <h3 class="card-title">AI Vision Models</h3>
-          <p class="card-text">
-            Ready out of the box with built-in vision models and automatic fallback. Connect your own Gemini key or custom OpenAI endpoint anytime.
-          </p>
-
-          <div class="chip-rail" role="tablist" aria-label="AI vision models">
-            <button type="button" class="chip-tab is-active" role="tab" aria-selected="true" tabindex="0" data-model="deepseek">DeepSeek 4.1 Flash</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-model="glm">GLM 5.3 Flash</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-model="muse">Muse Spark Open</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-model="toptools">Top-Tools AI Pro/Max</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-model="gemini">Gemini 2.5 Flash</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-model="custom">Custom OpenAI</button>
-          </div>
-
-          <div class="quiet-readout" aria-live="polite">
-            <span class="readout-tag" id="modelProvider">Built-in · Auto-fallback ON</span>
-            <p class="readout-line" id="modelSpecLine">1M context · Vision · Fast hook and retention reasoning</p>
-          </div>
-        </article>
-
-        <!-- Capability 2: On-Device Media3 GPU -->
-        <article class="moka-card cap-card">
-          <h3 class="card-title">On-Device Media3 GPU</h3>
-          <p class="card-text">
-            Hardware-accelerated Android exports with zero cloud queues. Choose Instant Cut transmuxing or full GPU rendering up to HD 720p.
-          </p>
-
-          <dl class="spec-rows">
-            <div class="spec-row">
-              <dt>Exports</dt>
-              <dd>Instant Cut · 360p · 480p · 540p · 720p HD</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Aspect</dt>
-              <dd>9:16 Fill · 9:16 Fit · 1:1 Square · Original</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Presets</dt>
-              <dd>Hormozi Reel · Anti-Copyright Max · 9:16 Full View · Clean Original</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Grades</dt>
-              <dd>Vibrant Pop · Cinema Warm · Crisp Cool · Punchy HDR</dd>
-            </div>
-          </dl>
-        </article>
-
-        <!-- Capability 3: Viral Studio Copy -->
-        <article class="moka-card cap-card">
-          <h3 class="card-title">Viral Studio Copy</h3>
-          <p class="card-text">
-            Generate hooks, platform descriptions, and hashtags across six tones tailored to every network's character limit.
-          </p>
-
-          <div class="chip-rail" role="tablist" aria-label="Viral Studio caption tones">
-            <button type="button" class="chip-tab is-active" role="tab" aria-selected="true" tabindex="0" data-tone="viral">Viral Hook</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-tone="meme">Funny / Meme</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-tone="tips">Value / Tips</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-tone="hottake">Hot Take</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-tone="story">Story Mode</button>
-            <button type="button" class="chip-tab" role="tab" aria-selected="false" tabindex="-1" data-tone="minimal">Clean Minimal</button>
-          </div>
-
-          <div class="quiet-readout" aria-live="polite">
-            <p class="readout-quote" id="toneCaption">"Most creators lose viewers in two seconds. Start on the tension instead."</p>
-            <span class="readout-tags" id="toneTags">#shortform #editingtips #creatorworkflow #android</span>
-          </div>
-
-          <p class="platform-footnote">TikTok · Reels · Shorts · Facebook · X · Threads</p>
-        </article>
-
-        <!-- Capability 4: Live Stream Capture -->
-        <article class="moka-card cap-card">
-          <h3 class="card-title">Live Stream Capture</h3>
-          <p class="card-text">
-            Clip YouTube Live broadcasts and <code>.m3u8</code> HLS feeds while the stream is still running, with optional watermark, mirror, zoom, and speed/pitch controls.
-          </p>
-
-          <div class="live-strip">
-            <div class="live-strip-head">
-              <span class="live-pill"><span class="live-dot" aria-hidden="true"></span>LIVE HLS</span>
-              <span class="mono-meta">IN 14:22 · OUT 15:08</span>
-            </div>
-            <div class="live-meter" aria-hidden="true">
-              <span style="--h: 36%"></span>
-              <span style="--h: 62%"></span>
-              <span style="--h: 50%"></span>
-              <span style="--h: 88%"></span>
-              <span style="--h: 96%"></span>
-              <span style="--h: 72%"></span>
-              <span style="--h: 46%"></span>
-              <span style="--h: 84%"></span>
-              <span style="--h: 92%"></span>
-              <span style="--h: 60%"></span>
-              <span style="--h: 44%"></span>
-              <span style="--h: 78%"></span>
-            </div>
-          </div>
-
-          <dl class="spec-rows">
-            <div class="spec-row">
-              <dt>Transforms</dt>
-              <dd>Mirror · Zoom 1.08x · Pitch 1.02x · Speed 1.00x</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Overlays</dt>
-              <dd>Frame border · Hook banner · Custom @handle</dd>
-            </div>
-          </dl>
-        </article>
-      </div>
-    </section>
-
-    <!-- 5. Pricing Window -->
-    <section class="moka-window pricing-window" id="pricing" aria-labelledby="pricing-heading">
-      <div class="pricing-head-row">
-        <div class="window-head">
-          <h2 id="pricing-heading" class="window-title">Simple pricing</h2>
-          <p class="window-sub">Start free on Android. Upgrade in Telegram with no credit card.</p>
-        </div>
-
-        <div class="currency-box">
-          <div class="currency-pills" role="tablist" aria-label="Supported checkout currencies">
-            <button type="button" class="currency-pill is-active" role="tab" aria-selected="true" tabindex="0" data-asset="USDT">USDT</button>
-            <button type="button" class="currency-pill" role="tab" aria-selected="false" tabindex="-1" data-asset="TON">TON</button>
-            <button type="button" class="currency-pill" role="tab" aria-selected="false" tabindex="-1" data-asset="USDC">USDC</button>
-          </div>
-          <p class="currency-note" id="cryptoNote" aria-live="polite">
-            Pay in <strong>USDT</strong> (TRC-20, TON, or ERC-20) via <code>@CryptoBot</code> and <code>@viralclibot</code>.
-          </p>
+    <!-- 4. DOWNLOAD -->
+    <section class="dl" id="download">
+      <div class="dl-bg" aria-hidden="true">
+        <div class="dl-fade">
+          <div class="wash wash-b"></div>
         </div>
       </div>
 
-      <div class="pricing-grid">
-        <article class="moka-card plan-card">
-          <div class="plan-head">
-            <div class="plan-title-row">
-              <h3 class="card-title">Free</h3>
-            </div>
-            <div class="plan-price">
-              <span class="price-val">$0</span>
-              <span class="price-unit">/ forever</span>
-            </div>
+      <div class="dl-in">
+        <h2 class="bento-h dl-h rv" data-i18n="dlTitle">Android 8.0+</h2>
+
+        <div class="dl-bar rv" id="dlBar">
+          <div class="dl-sw" id="dlSwitch" role="tablist" aria-label="Download option" style="--i:0">
+            <div class="dl-th" aria-hidden="true"></div>
+            <button type="button" class="on" role="tab" aria-selected="true" data-dl-opt="0" data-i18n="dlOpt0">APK v3.0.1</button>
+            <button type="button" role="tab" aria-selected="false" data-dl-opt="1" data-i18n="dlOpt1">Pro Bot</button>
           </div>
-          <ul class="plan-list">
-            <li>3 AI clip analyses per day</li>
-            <li>Express 360p and Fast 480p exports</li>
-            <li>Dark Pill and Bold Outline captions</li>
-            <li>Instant YT Peaks</li>
-            <li>Local files and YouTube links</li>
-          </ul>
-          <a class="pill-btn pill-light pill-sm plan-cta" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
-            Download Free
+          <a class="moka-btn" id="dlActionBtn" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 4v11.5M7.5 11.5L12 16l4.5-4.5M5 19.5h14"/>
+            </svg>
+            <span id="dlActionLabel">Download ClipViral.apk</span>
           </a>
-        </article>
-
-        <article class="moka-card plan-card">
-          <div class="plan-head">
-            <div class="plan-title-row">
-              <h3 class="card-title">Pro Weekly</h3>
-            </div>
-            <div class="plan-price">
-              <span class="price-val">$1.69</span>
-              <span class="price-unit">/ 7 days</span>
-            </div>
-          </div>
-          <ul class="plan-list">
-            <li>Unlimited AI clips and Studio packs</li>
-            <li>HD 720p and 540p exports</li>
-            <li>Karaoke Pop and Neon Glow captions</li>
-            <li>Live Capture</li>
-            <li>Custom watermark</li>
-          </ul>
-          <a class="pill-btn pill-light pill-sm plan-cta" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
-            Get Weekly
-          </a>
-        </article>
-
-        <article class="moka-card plan-card plan-featured">
-          <div class="plan-head">
-            <div class="plan-title-row">
-              <h3 class="card-title">Pro Monthly</h3>
-              <span class="plan-badge badge-accent">Most popular</span>
-            </div>
-            <div class="plan-price">
-              <span class="price-val">$4.29</span>
-              <span class="price-unit">/ 30 days</span>
-            </div>
-          </div>
-          <ul class="plan-list">
-            <li>Every Pro feature included</li>
-            <li>Priority Top-Tools AI Max and DeepSeek</li>
-            <li>Batch Render All multi-clip export</li>
-            <li>HD 720p and Karaoke captions</li>
-            <li>Live Capture and custom watermark</li>
-          </ul>
-          <a class="pill-btn pill-primary pill-sm plan-cta" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
-            Get Monthly
-          </a>
-        </article>
-
-        <article class="moka-card plan-card">
-          <div class="plan-head">
-            <div class="plan-title-row">
-              <h3 class="card-title">Pro Lifetime</h3>
-              <span class="plan-badge badge-neutral">Best value</span>
-            </div>
-            <div class="plan-price">
-              <span class="price-val">$12.99</span>
-              <span class="price-unit">/ one-time</span>
-            </div>
-          </div>
-          <ul class="plan-list">
-            <li>Pay once in USDT, TON, or USDC</li>
-            <li>Forever Pro access with no renewals</li>
-            <li>Linked to your Telegram account</li>
-            <li>Priority AI models and Render All</li>
-            <li>Unlimited HD 720p and Live Capture</li>
-          </ul>
-          <a class="pill-btn pill-light pill-sm plan-cta" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
-            Get Lifetime
-          </a>
-        </article>
-      </div>
-
-      <p class="pricing-foot">
-        Install ClipViral.apk, open the Account tab, and link <a href="https://t.me/viralclibot" target="_blank" rel="noopener noreferrer">@viralclibot</a> in Telegram.
-      </p>
-    </section>
-
-    <!-- 6. Install & Verification Window -->
-    <section class="moka-window install-window" id="install" aria-labelledby="install-heading">
-      <div class="window-head">
-        <h2 id="install-heading" class="window-title">Install APK</h2>
-        <p class="window-sub">Direct signed release from GitHub Releases.</p>
-      </div>
-
-      <div class="install-grid">
-        <!-- Left Card: 3 Sideload Steps + Download & Releases Pills -->
-        <div class="moka-card install-card">
-          <ol class="install-steps">
-            <li>
-              <span class="install-step-num">1</span>
-              <div>
-                <h3 class="install-step-title">Download ClipViral.apk</h3>
-                <p class="card-text">Save the signed 21 MB release file straight to your Android device.</p>
-              </div>
-            </li>
-            <li>
-              <span class="install-step-num">2</span>
-              <div>
-                <h3 class="install-step-title">Allow unknown apps</h3>
-                <p class="card-text">Open the APK file and enable Install unknown apps for your browser when prompted.</p>
-              </div>
-            </li>
-            <li>
-              <span class="install-step-num">3</span>
-              <div>
-                <h3 class="install-step-title">Clip in seconds</h3>
-                <p class="card-text">Launch ClipViral, paste any link or pick a video, and export on your GPU.</p>
-              </div>
-            </li>
-          </ol>
-
-          <div class="action-row">
-            <a class="pill-btn pill-primary pill-lg" href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M8 2v8m0 0L4.5 6.5M8 10l3.5-3.5M2.5 13h11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>Download APK · 21 MB</span>
-            </a>
-
-            <a
-              class="pill-btn pill-light pill-lg"
-              href="https://github.com/dandysuper/clipviral-site/releases"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>Open Releases</span>
-            </a>
-          </div>
         </div>
 
-        <!-- Right Card: Release Specs + In-Card Slide-Wrap Checksum Toggle -->
-        <aside class="moka-card release-card" aria-label="Release details and checksum">
-          <div class="release-body">
-            <div class="release-head">
-              <div class="release-brand">
-                <img src="assets/app-icon.png" width="24" height="24" alt="" class="release-icon">
-                <h3 class="card-title">Release v3.0.1</h3>
-              </div>
-              <span class="plan-badge badge-neutral">Signed APK</span>
-            </div>
-
-            <dl class="spec-rows">
-              <div class="spec-row">
-                <dt>Version</dt>
-                <dd>v3.0.1 (build 10)</dd>
-              </div>
-              <div class="spec-row">
-                <dt>Package</dt>
-                <dd>com.clipviral.app</dd>
-              </div>
-              <div class="spec-row">
-                <dt>Android</dt>
-                <dd>8.0+ (API 26+)</dd>
-              </div>
-              <div class="spec-row">
-                <dt>File size</dt>
-                <dd>21 MB</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div class="release-disclosure">
-            <button
-              type="button"
-              class="disclosure-row-btn"
-              id="toggleReleaseBtn"
-              aria-expanded="false"
-              aria-controls="releaseSlideWrap"
-            >
-              <span id="toggleReleaseLabel">Show checksum</span>
-              <svg class="disclosure-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M4.25 6.25L8 10l3.75-3.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-
-            <!-- Authentic Moka Slide-Wrap Disclosure directly below its trigger -->
-            <div class="slide-wrap" id="releaseSlideWrap" aria-hidden="true">
-              <div class="slide-wrap-inner">
-                <div class="sha-panel">
-                  <span class="sha-title">SHA-256 checksum</span>
-                  <code class="sha-code" id="shaValue">f1cf24dd28d78f16176a83f244f4b32492b0f996de216bcfc25c58920cacf6ac</code>
-                  <div class="action-row sha-actions">
-                    <button
-                      type="button"
-                      class="pill-btn pill-primary pill-sm"
-                      id="copyShaBtn"
-                      data-sha="f1cf24dd28d78f16176a83f244f4b32492b0f996de216bcfc25c58920cacf6ac"
-                    >
-                      <span id="copyShaLabel">Copy hash</span>
-                    </button>
-                  </div>
-                  <span class="sr-only" id="copyStatusLive" aria-live="polite"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
+        <div class="dl-meta">
+          <span class="dl-meta-group">
+            <span class="mono-meta">v3.0.1 · 21 MB</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <button type="button" id="copyShaBtn" class="mono-meta" data-i18n="copySha">Copy SHA-256</button>
+          </span>
+          <span class="sep sep-mid" aria-hidden="true">·</span>
+          <span class="dl-meta-group">
+            <a href="https://github.com/dandysuper/clipviral-site/releases" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <span class="sep" aria-hidden="true">·</span>
+            <a href="https://jebus.bond" target="_blank" rel="noopener noreferrer">jebus.bond</a>
+          </span>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- 7. Minimal Footer -->
-  <footer class="shell site-footer">
-    <div class="footer-row">
-      <div class="footer-brand">
-        <img src="assets/app-icon.png" width="22" height="22" alt="" class="footer-icon">
-        <span>ClipViral AI · v3.0.1</span>
-      </div>
-
-      <nav class="footer-links" aria-label="Footer navigation">
-        <a href="https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk">Download APK</a>
-        <a href="https://github.com/dandysuper/clipviral-site" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://t.me/viralclibot" target="_blank" rel="noopener noreferrer">Telegram (@viralclibot)</a>
-        <a href="https://jebus.bond/" target="_blank" rel="noopener noreferrer">jebus.bond</a>
-      </nav>
-    </div>
-
-    <p class="footer-credit">
-      Built by Daniil Burykin · <a href="https://clipviral.jebus.bond/">clipviral.jebus.bond</a>
-    </p>
-  </footer>
-
-  <script type="module" src="app.js"></script>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

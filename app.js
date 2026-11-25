@@ -1,677 +1,717 @@
 /* ==========================================================================
-   ClipViral AI - Interactive App Controller (Mokagram M3 + Three.js 3D Icon)
-   Zero external UI dependencies, keyboard accessible, reduced-motion aware
+   ClipViral AI (Iteration 4 - Rulebook Edition)
+   Bilingual EN/RU, Theme Sync, html.fw Guard, Staged Goo Nav, 20-Card Bento,
+   12-Col Engine Goo Grid, WebGL Rays, and Three.js r186 3D Play-Button Icon
    ========================================================================== */
 
+import { ICONS } from "./icons.js";
+import { initHeroRays } from "./rays.js";
+
+const APK_URL = "https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk";
+const PRO_BOT_URL = "https://t.me/viralclibot";
+const APK_SHA256 = "f1cf24dd28d78f16176a83f244f4b32492b0f996de216bcfc25c58920cacf6ac";
+
+const docEl = document.documentElement;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // --------------------------------------------------------------------------
-// 1. Dark / Light Theme Switcher
+// 1. Bilingual Copy Dictionary (EN + RU, declarative sentence-case voice)
 // --------------------------------------------------------------------------
-const rootEl = document.documentElement;
+const COPY = {
+  en: {
+    skip: "Skip to content",
+    themeLabel: "Theme",
+    langLabel: "Language",
+    navFeatures: "Features",
+    navEngine: "Engine",
+    lead: "Long videos into vertical clips, right on Android.",
+    heroBtn: "Download",
+    heroCodeBtn: "Check releases",
+    featTitle: "What's inside",
+    showAll: "Show all 20",
+    collapse: "Collapse",
+    engineTitle: "Engine & Pro",
+    engineLead: "Built to cut, caption, and post straight from your phone.",
+    abTitle: "What the engine handles",
+    howTitle: "How to install",
+    pricingTitle: "Free and Pro",
+    pricingText:
+      "Free gives 3 AI analyses a day at 360p and 480p with Instant YT Peaks. Pro via @CryptoBot removes limits and unlocks 720p, Karaoke/Neon, and Live Capture: $1.69 weekly, $4.29 monthly, $12.99 lifetime.",
+    modelsTitle: "Presets and models",
+    modelsText:
+      "Six built-in vision models work without keys. Plug in Gemini 2.5 Flash or any OpenAI endpoint, or switch render presets in one tap.",
+    codeNote: "// Preset: Hormozi Reel · Media3 GPU",
+    dlTitle: "Android 8.0+",
+    dlOpt0: "APK v3.0.1",
+    dlOpt1: "Pro Bot",
+    dlCta0: "Download ClipViral.apk",
+    dlCta1: "Open @viralclibot",
+    copySha: "Copy SHA-256",
+    copiedSha: "Copied",
+    features: [
+      { icon: "heatmap", title: "YouTube heatmaps", body: "Finds Most Replayed spikes automatically." },
+      { icon: "gpu", title: "On-device GPU", body: "Media3 hardware rendering with no cloud queue." },
+      { icon: "karaoke", title: "Karaoke captions", body: "Word-by-word yellow pop synced to speech." },
+      { icon: "live", title: "Live capture", body: "Clip YouTube Live and .m3u8 streams in real time." },
+      { icon: "instant", title: "Instant Cut", body: "Zero re-encode audio pass when speed stays 1.0x." },
+      { icon: "sponsor", title: "SponsorBlock skip", body: "Drops sponsor reads before scoring moments." },
+      { icon: "score", title: "Viral score", body: "Breaks each clip into hook, retention, shareability." },
+      { icon: "vision", title: "Built-in vision AI", body: "DeepSeek 4.1, GLM 5.3, Muse Spark, Top-Tools ready." },
+      { icon: "apikey", title: "Own API keys", body: "Connect Gemini 2.5 Flash or any OpenAI endpoint." },
+      { icon: "fallback", title: "Auto fallback", body: "Switches AI providers quietly if one hits limits." },
+      { icon: "presets", title: "Six creator presets", body: "Hormozi Reel, Anti-Copyright Max, Clean Original." },
+      { icon: "styles", title: "Four caption styles", body: "Karaoke Pop, Dark Pill, Bold Outline, Neon Glow." },
+      { icon: "grading", title: "Color grading", body: "Vibrant Pop, Cinema Warm, Crisp Cool, Punchy HDR." },
+      { icon: "aspect", title: "Four aspect ratios", body: "9:16 Fill, 9:16 Fit, 1:1 Square, and Original." },
+      { icon: "hd720", title: "Up to 720p HD", body: "Express 360p, Fast 480p, Balanced 540p, HD 720p." },
+      { icon: "studio", title: "Viral Studio", body: "Hooks, captions, and hashtags across six tones." },
+      { icon: "share", title: "Share sheet ingest", body: "Send links or files straight from YouTube or Gallery." },
+      { icon: "posting", title: "Direct posting", body: "Opens right into TikTok, Reels, Shorts, X, Threads." },
+      { icon: "anticopyright", title: "Anti-copyright tools", body: "Mirror, zoom, speed, pitch, border, watermark." },
+      { icon: "srt", title: "SRT and manual trim", body: "Attach .srt files or cut custom time ranges." },
+    ],
+    abilities: [
+      { icon: "abPeaks", title: "Peak detection", body: "Combines YouTube replay heatmaps, SponsorBlock skips, and vision frames." },
+      { icon: "abGpu", title: "Hardware rendering", body: "Media3 Transformer runs locally on Android GPU at 24 to 30 fps." },
+      { icon: "abCopy", title: "Social copywriting", body: "Writes hooks and captions tailored to each platform's character limit." },
+      { icon: "abPro", title: "Telegram Pro unlock", body: "Links via @viralclibot with instant USDT, TON, or USDC checkout." },
+    ],
+    steps: [
+      { title: "Download ClipViral.apk", body: "21 MB signed build for Android 8.0 and newer." },
+      { title: "Allow unknown apps", body: "Tap the file once and confirm install in Android settings." },
+      { title: "Paste any link", body: "Pick a YouTube URL, live stream, or local video and export." },
+    ],
+  },
+  ru: {
+    skip: "К содержанию",
+    themeLabel: "Тема",
+    langLabel: "Язык",
+    navFeatures: "Фичи",
+    navEngine: "Движок",
+    lead: "Длинные видео в вертикальные клипы прямо на Android.",
+    heroBtn: "Скачать",
+    heroCodeBtn: "Смотреть релизы",
+    featTitle: "Что внутри",
+    showAll: "Показать все 20",
+    collapse: "Свернуть",
+    engineTitle: "Движок и Pro",
+    engineLead: "Режет, титрует и публикует прямо с телефона.",
+    abTitle: "Что берёт на себя движок",
+    howTitle: "Как поставить",
+    pricingTitle: "Free и Pro",
+    pricingText:
+      "Free даёт 3 AI-анализа в день в 360p и 480p с картой повторов YouTube. Pro через @CryptoBot снимает лимиты и открывает 720p, Караоке/Неон и захват стримов: $1.69 в неделю, $4.29 в месяц, $12.99 навсегда.",
+    modelsTitle: "Пресеты и модели",
+    modelsText:
+      "Шесть встроенных vision-моделей работают без ключей. Подключай Gemini 2.5 Flash или любой OpenAI-эндпоинт и меняй пресеты рендера в одно касание.",
+    codeNote: "// Пресет: Hormozi Reel · Media3 GPU",
+    dlTitle: "Android 8.0+",
+    dlOpt0: "APK v3.0.1",
+    dlOpt1: "Pro-бот",
+    dlCta0: "Скачать ClipViral.apk",
+    dlCta1: "Открыть @viralclibot",
+    copySha: "Копировать SHA-256",
+    copiedSha: "Скопировано",
+    features: [
+      { icon: "heatmap", title: "Карта повторов", body: "Сама находит пики просмотров на YouTube." },
+      { icon: "gpu", title: "Рендер на GPU", body: "Аппаратный рендер Media3 без облачных очередей." },
+      { icon: "karaoke", title: "Караоке-субтитры", body: "Пословная жёлтая подсветка в такт речи." },
+      { icon: "live", title: "Захват стримов", body: "Нарезка YouTube Live и .m3u8 прямо в эфире." },
+      { icon: "instant", title: "Мгновенная резка", body: "Без перекодировки звука на обычной скорости." },
+      { icon: "sponsor", title: "Пропуск рекламы", body: "SponsorBlock убирает интеграции до анализа." },
+      { icon: "score", title: "Оценка виральности", body: "Раскладывает клип на хук, удержание и репосты." },
+      { icon: "vision", title: "Встроенный AI", body: "DeepSeek 4.1, GLM 5.3, Muse Spark и Top-Tools." },
+      { icon: "apikey", title: "Свои API-ключи", body: "Gemini 2.5 Flash или любой OpenAI-совместимый URL." },
+      { icon: "fallback", title: "Авто-фолбэк", body: "Переключает провайдера сам при лимите запросов." },
+      { icon: "presets", title: "Шесть пресетов", body: "Hormozi Reel, Anti-Copyright Max и чистый оригинал." },
+      { icon: "styles", title: "Четыре стиля титров", body: "Karaoke Pop, Dark Pill, Bold Outline и Neon Glow." },
+      { icon: "grading", title: "Цветокоррекция", body: "Vibrant Pop, Cinema Warm, Crisp Cool и Punchy HDR." },
+      { icon: "aspect", title: "Четыре формата", body: "9:16 Fill, 9:16 Fit, 1:1 квадрат и оригинал." },
+      { icon: "hd720", title: "До 720p HD", body: "Express 360p, Fast 480p, Balanced 540p и HD 720p." },
+      { icon: "studio", title: "Вирусная студия", body: "Хуки, описания и хештеги в шести тональностях." },
+      { icon: "share", title: "Вход из «Поделиться»", body: "Отправляй ссылки и видео из YouTube или галереи." },
+      { icon: "posting", title: "Прямой постинг", body: "Отправка сразу в TikTok, Reels, Shorts, X и Threads." },
+      { icon: "anticopyright", title: "Анти-копирайт", body: "Зеркало, зум, скорость, питч, рамка и водяной знак." },
+      { icon: "srt", title: "SRT и ручной трим", body: "Импорт своих .srt и точная обрезка по таймкоду." },
+    ],
+    abilities: [
+      { icon: "abPeaks", title: "Поиск пиков", body: "Совмещает карту повторов YouTube, пропуски SponsorBlock и кадры AI." },
+      { icon: "abGpu", title: "Аппаратный рендер", body: "Media3 Transformer рендерит локально на GPU Android в 24–30 fps." },
+      { icon: "abCopy", title: "Тексты для соцсетей", body: "Пишет хуки и описания под лимиты символов каждой площадки." },
+      { icon: "abPro", title: "Pro через Telegram", body: "Привязка через @viralclibot с оплатой в USDT, TON или USDC." },
+    ],
+    steps: [
+      { title: "Скачай ClipViral.apk", body: "Подписанная сборка 21 MB для Android 8.0 и выше." },
+      { title: "Разреши установку", body: "Открой файл один раз и подтверди установку в настройках Android." },
+      { title: "Вставь любую ссылку", body: "Выбери ролик YouTube, стрим или видео с телефона и экспортируй." },
+    ],
+  },
+};
+
+// --------------------------------------------------------------------------
+// 2. State: Theme, Language, Download Option, Mobile Bento Expansion
+// --------------------------------------------------------------------------
+let currentLang = docEl.getAttribute("lang") === "ru" ? "ru" : "en";
+let currentTheme = docEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+let currentDlOpt = 0;
+let bentoOpen = false;
+let icon3dController = null;
+let raysController = null;
+
+// --------------------------------------------------------------------------
+// 3. Build 20-Card Goo-Blob Feature Grid (#goo-b)
+// --------------------------------------------------------------------------
+const bentoGrid = document.getElementById("bentoGrid");
+const bentoGooLayer = document.getElementById("bentoGooLayer");
+const bentoContentLayer = document.getElementById("bentoContentLayer");
+const bentoMoreBtn = document.getElementById("bentoMoreBtn");
+
+function buildBentoGooLayer() {
+  if (!bentoGooLayer) return;
+  const frag = document.createDocumentFragment();
+
+  // 20 rounded goo rectangles matching the 4x5 cells
+  for (let i = 0; i < 20; i += 1) {
+    const cell = document.createElement("i");
+    cell.className = i >= 4 ? "gc x" : "gc";
+    frag.appendChild(cell);
+  }
+
+  // 16 desktop vertical bridges (4 row gaps x 4 cols) centered on each column
+  for (let r = 0; r < 4; r += 1) {
+    for (let c = 0; c < 4; c += 1) {
+      const br = document.createElement("i");
+      br.className = "br dsk v";
+      br.style.left = `calc(${c} * ((100% - 3 * var(--g)) / 4 + var(--g)) + (100% - 3 * var(--g)) / 8 - var(--bw) / 2)`;
+      br.style.top = `calc(${r} * (var(--r) + var(--g)) + var(--r) - 4px)`;
+      frag.appendChild(br);
+    }
+  }
+
+  // 15 desktop horizontal bridges (5 rows x 3 col gaps) centered on each row
+  for (let r = 0; r < 5; r += 1) {
+    for (let c = 0; c < 3; c += 1) {
+      const br = document.createElement("i");
+      br.className = "br dsk h";
+      br.style.left = `calc(${c + 1} * ((100% - 3 * var(--g)) / 4) + ${c} * var(--g) - 4px)`;
+      br.style.top = `calc(${r} * (var(--r) + var(--g)) + var(--r) / 2 - var(--bw) / 2)`;
+      frag.appendChild(br);
+    }
+  }
+
+  // 19 mobile vertical connectors
+  for (let m = 0; m < 19; m += 1) {
+    const br = document.createElement("i");
+    br.className = m >= 3 ? "br mob x" : "br mob";
+    br.style.top = `calc(${m + 1} * var(--r) + ${m} * var(--g) - 4px)`;
+    frag.appendChild(br);
+  }
+
+  bentoGooLayer.innerHTML = "";
+  bentoGooLayer.appendChild(frag);
+}
+
+function renderBentoContent(lang) {
+  if (!bentoContentLayer) return;
+  const items = COPY[lang].features;
+  bentoContentLayer.innerHTML = items
+    .map((item, idx) => {
+      const extraClass = idx >= 4 ? " x" : "";
+      const delayAttr = idx >= 4 ? ` style="--d:${(idx - 4) * 45}ms"` : "";
+      return `
+        <article class="bc${extraClass}"${delayAttr}>
+          <span class="ico-f">${ICONS[item.icon] || ""}</span>
+          <div class="bc-t">
+            <h3>${item.title}</h3>
+            <p>${item.body}</p>
+          </div>
+        </article>`;
+    })
+    .join("");
+}
+
+buildBentoGooLayer();
+
+// --------------------------------------------------------------------------
+// 4. Build 12-Col 4-Tile Engine & Pro Goo Grid (#goo-p)
+// --------------------------------------------------------------------------
+const engineGooLayer = document.getElementById("engineGooLayer");
+const engineContentLayer = document.getElementById("engineContentLayer");
+
+function buildEngineTilesMarkup(lang, isGhost) {
+  const dict = COPY[lang];
+  const tag = isGhost ? "div" : "article";
+  const abList = dict.abilities
+    .map(
+      (ab) => `
+        <li>
+          <span class="ico-f">${isGhost ? "" : ICONS[ab.icon] || ""}</span>
+          <div><b>${ab.title}</b><span>${ab.body}</span></div>
+        </li>`
+    )
+    .join("");
+
+  const stList = dict.steps
+    .map(
+      (st, idx) => `
+        <li>
+          <i>${idx + 1}</i>
+          <div><b>${st.title}</b><span>${st.body}</span></div>
+        </li>`
+    )
+    .join("");
+
+  const codeMarkup = `<pre class="code"><span class="c">${dict.codeNote}</span>
+<span class="k">val</span> clip = <span class="n">EditPreset</span>.<span class="s">HORMOZI_REEL</span>.copy(
+  quality = <span class="n">RenderQuality</span>.<span class="s">HD_720P</span>,
+  captions = <span class="n">CaptionStyle</span>.<span class="s">KARAOKE</span>,
+  color = <span class="n">ColorPreset</span>.<span class="s">HIGH_CONTRAST</span>,
+  mirror = <span class="k">false</span>,
+  zoom = <span class="n">1.05f</span>
+)</pre>`;
+
+  return `
+    <${tag} class="pt pt-a">
+      <h3>${dict.abTitle}</h3>
+      <ul class="ab">${abList}</ul>
+    </${tag}>
+    <${tag} class="pt pt-b">
+      <h3>${dict.howTitle}</h3>
+      <ol class="st">${stList}</ol>
+    </${tag}>
+    <${tag} class="pt pt-c">
+      <span class="ico-f">${isGhost ? "" : ICONS.tilePricing}</span>
+      <h3>${dict.pricingTitle}</h3>
+      <p>${dict.pricingText}</p>
+    </${tag}>
+    <${tag} class="pt pt-d">
+      <div class="pt-d-t">
+        <span class="ico-f">${isGhost ? "" : ICONS.tileModels}</span>
+        <h3>${dict.modelsTitle}</h3>
+        <p>${dict.modelsText}</p>
+      </div>
+      ${codeMarkup}
+    </${tag}>
+    ${isGhost ? '<i class="pn h1"></i><i class="pn h2"></i><i class="pn v1"></i><i class="pn v2"></i><i class="pn v3"></i>' : ""}`;
+}
+
+function renderEngineGrid(lang) {
+  if (engineGooLayer) {
+    engineGooLayer.innerHTML = buildEngineTilesMarkup(lang, true);
+  }
+  if (engineContentLayer) {
+    engineContentLayer.innerHTML = buildEngineTilesMarkup(lang, false);
+  }
+}
+
+// --------------------------------------------------------------------------
+// 5. Language Switcher (EN / RU) & Download Bar Sync
+// --------------------------------------------------------------------------
+const langToggle = document.getElementById("langToggle");
+const langCodeEl = document.getElementById("langCode");
+const dlSwitch = document.getElementById("dlSwitch");
+const dlActionBtn = document.getElementById("dlActionBtn");
+const dlActionLabel = document.getElementById("dlActionLabel");
+const dlButtons = Array.from(document.querySelectorAll("[data-dl-opt]"));
+const copyShaBtn = document.getElementById("copyShaBtn");
+let copyShaTimer = null;
+
+function syncDownloadBar() {
+  const dict = COPY[currentLang];
+  if (dlSwitch) {
+    dlSwitch.style.setProperty("--i", String(currentDlOpt));
+  }
+  dlButtons.forEach((btn, idx) => {
+    const active = idx === currentDlOpt;
+    btn.classList.toggle("on", active);
+    btn.setAttribute("aria-selected", String(active));
+  });
+  if (dlActionBtn) {
+    dlActionBtn.setAttribute("href", currentDlOpt === 0 ? APK_URL : PRO_BOT_URL);
+    if (currentDlOpt === 1) {
+      dlActionBtn.setAttribute("target", "_blank");
+      dlActionBtn.setAttribute("rel", "noopener noreferrer");
+    } else {
+      dlActionBtn.removeAttribute("target");
+      dlActionBtn.removeAttribute("rel");
+    }
+  }
+  if (dlActionLabel) {
+    dlActionLabel.textContent = currentDlOpt === 0 ? dict.dlCta0 : dict.dlCta1;
+  }
+}
+
+function syncBentoMoreLabel() {
+  if (!bentoMoreBtn) return;
+  const dict = COPY[currentLang];
+  bentoMoreBtn.textContent = bentoOpen ? dict.collapse : dict.showAll;
+  bentoMoreBtn.setAttribute("aria-expanded", String(bentoOpen));
+}
+
+function applyLanguage(lang, persist = true) {
+  currentLang = lang === "ru" ? "ru" : "en";
+  docEl.setAttribute("lang", currentLang);
+  const dict = COPY[currentLang];
+
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
+    if (key && dict[key] !== undefined) {
+      el.textContent = dict[key];
+    }
+  });
+
+  if (langCodeEl) {
+    langCodeEl.textContent = currentLang.toUpperCase();
+  }
+  if (langToggle) {
+    langToggle.setAttribute("aria-label", dict.langLabel);
+  }
+  const themeToggleEl = document.getElementById("themeToggle");
+  if (themeToggleEl) {
+    themeToggleEl.setAttribute("aria-label", dict.themeLabel);
+  }
+
+  renderBentoContent(currentLang);
+  renderEngineGrid(currentLang);
+  syncBentoMoreLabel();
+  syncDownloadBar();
+
+  if (persist) {
+    try {
+      localStorage.setItem("clipviral-lang", currentLang);
+    } catch (_err) {}
+  }
+}
+
+if (langToggle) {
+  langToggle.addEventListener("click", () => {
+    applyLanguage(currentLang === "en" ? "ru" : "en", true);
+  });
+}
+
+dlButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const idx = Number(btn.getAttribute("data-dl-opt"));
+    if (!Number.isNaN(idx)) {
+      currentDlOpt = idx;
+      syncDownloadBar();
+    }
+  });
+});
+
+if (bentoMoreBtn && bentoGrid) {
+  bentoMoreBtn.addEventListener("click", () => {
+    bentoOpen = !bentoOpen;
+    bentoGrid.classList.toggle("open", bentoOpen);
+    syncBentoMoreLabel();
+  });
+}
+
+if (copyShaBtn) {
+  copyShaBtn.addEventListener("click", async () => {
+    let copied = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(APK_SHA256);
+        copied = true;
+      }
+    } catch (_err) {
+      copied = false;
+    }
+
+    if (!copied) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = APK_SHA256;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        copied = true;
+      } catch (_err) {}
+    }
+
+    copyShaBtn.textContent = COPY[currentLang].copiedSha;
+    copyShaBtn.classList.add("copied");
+    if (copyShaTimer) window.clearTimeout(copyShaTimer);
+    copyShaTimer = window.setTimeout(() => {
+      copyShaBtn.textContent = COPY[currentLang].copySha;
+      copyShaBtn.classList.remove("copied");
+    }, 2000);
+  });
+}
+
+applyLanguage(currentLang, false);
+
+// --------------------------------------------------------------------------
+// 6. Theme Switcher (sets BOTH data-theme and data-mode per STYLEGUIDE.md)
+// --------------------------------------------------------------------------
 const themeToggle = document.getElementById("themeToggle");
 const themeColorMeta = document.getElementById("themeColorMeta");
-let icon3dController = null;
 
 function applyTheme(theme, persist = true) {
-  const isLight = theme === "light";
-  rootEl.setAttribute("data-theme", isLight ? "light" : "dark");
+  currentTheme = theme === "dark" ? "dark" : "light";
+  const isDark = currentTheme === "dark";
+
+  docEl.setAttribute("data-theme", currentTheme);
+  docEl.setAttribute("data-mode", currentTheme);
 
   if (themeColorMeta) {
-    themeColorMeta.setAttribute("content", isLight ? "#f1f1f1" : "#151515");
+    themeColorMeta.setAttribute("content", isDark ? "#141414" : "#fbfbfb");
   }
 
   if (themeToggle) {
-    const sunIcon = themeToggle.querySelector(".icon-sun");
-    const moonIcon = themeToggle.querySelector(".icon-moon");
-    if (sunIcon) sunIcon.hidden = isLight;
-    if (moonIcon) moonIcon.hidden = !isLight;
-    themeToggle.setAttribute("aria-pressed", String(isLight));
-    themeToggle.setAttribute("aria-label", isLight ? "Switch to dark theme" : "Switch to light theme");
+    const sun = themeToggle.querySelector(".icon-sun");
+    const moon = themeToggle.querySelector(".icon-moon");
+    if (sun) sun.toggleAttribute("hidden", !isDark);
+    if (moon) moon.toggleAttribute("hidden", isDark);
+    themeToggle.setAttribute("aria-pressed", String(isDark));
   }
 
   if (icon3dController && typeof icon3dController.setTheme === "function") {
-    icon3dController.setTheme(isLight ? "light" : "dark");
+    icon3dController.setTheme(currentTheme);
+  }
+  if (raysController && typeof raysController.setTheme === "function") {
+    raysController.setTheme(currentTheme);
   }
 
   if (persist) {
     try {
-      localStorage.setItem("clipviral-theme", isLight ? "light" : "dark");
-    } catch (_err) {
-      // Ignore private browsing storage restrictions
-    }
+      localStorage.setItem("clipviral-theme", currentTheme);
+    } catch (_err) {}
   }
 }
 
-applyTheme(rootEl.getAttribute("data-theme") === "light" ? "light" : "dark", false);
+applyTheme(currentTheme, false);
 
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
-    const next = rootEl.getAttribute("data-theme") === "light" ? "dark" : "light";
-    applyTheme(next, true);
+    applyTheme(currentTheme === "dark" ? "light" : "dark", true);
   });
 }
 
 // --------------------------------------------------------------------------
-// 2. Mobile Navigation Drawer
+// 7. Scroll Blades (.blur[data-stuck]) & Nav Halo (.nav.stuck)
 // --------------------------------------------------------------------------
-const menuBtn = document.getElementById("mobileMenuBtn");
-const mobileNav = document.getElementById("mobileNav");
+const mainNav = document.getElementById("mainNav");
+const blurTop = document.getElementById("blurTop");
+const blurBottom = document.getElementById("blurBottom");
 
-if (menuBtn && mobileNav) {
-  const closeMenu = () => {
-    menuBtn.setAttribute("aria-expanded", "false");
-    mobileNav.hidden = true;
-  };
+function updateScrollChrome() {
+  const stuck = (window.scrollY || window.pageYOffset || 0) > 12;
+  if (mainNav) mainNav.classList.toggle("stuck", stuck);
+  if (blurTop) {
+    if (stuck) blurTop.setAttribute("data-stuck", "");
+    else blurTop.removeAttribute("data-stuck");
+  }
+  if (blurBottom) {
+    if (stuck) blurBottom.setAttribute("data-stuck", "");
+    else blurBottom.removeAttribute("data-stuck");
+  }
+}
 
-  menuBtn.addEventListener("click", () => {
-    const isOpen = menuBtn.getAttribute("aria-expanded") === "true";
-    menuBtn.setAttribute("aria-expanded", String(!isOpen));
-    mobileNav.hidden = isOpen;
-  });
+window.addEventListener("scroll", updateScrollChrome, { passive: true });
+updateScrollChrome();
 
-  mobileNav.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", closeMenu);
-  });
+// --------------------------------------------------------------------------
+// 8. Scroll Reveal (.rv -> .rv.in via IntersectionObserver + fast-scroll sweep)
+// --------------------------------------------------------------------------
+const rvNodes = Array.from(document.querySelectorAll(".rv"));
+let rvObserver = null;
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && menuBtn.getAttribute("aria-expanded") === "true") {
-      closeMenu();
-      menuBtn.focus();
+function sweepReveals() {
+  const cutoff = window.innerHeight * 0.94;
+  rvNodes.forEach((node) => {
+    if (node.classList.contains("in")) return;
+    if (node.getBoundingClientRect().top < cutoff) {
+      node.classList.add("in");
+      if (rvObserver) rvObserver.unobserve(node);
     }
   });
 }
 
-// --------------------------------------------------------------------------
-// 3. Interactive Clip Studio (9:16 Preview + Heatmap + Captions + M3 Switches)
-// --------------------------------------------------------------------------
-const CLIPS = [
-  {
-    timecode: "04:18 to 05:02",
-    score: 94,
-    hook: 96,
-    retention: 94,
-    share: 92,
-    banner: "WHY 90% OF SHORTS DIE AT 0:03",
-    bracketX: 68,
-    lines: [
-      ["Most", "creators", "lose", "viewers", "before", "second", "three."],
-      ["Cut", "the", "intro", "and", "start", "on", "the", "payoff."],
-    ],
-  },
-  {
-    timecode: "11:42 to 12:19",
-    score: 91,
-    hook: 90,
-    retention: 93,
-    share: 89,
-    banner: "LOCAL GPU RENDER IN 8 SECONDS",
-    bracketX: 292,
-    lines: [
-      ["Why", "wait", "ten", "minutes", "in", "a", "cloud", "queue?"],
-      ["Your", "phone", "GPU", "renders", "720p", "right", "here."],
-    ],
-  },
-  {
-    timecode: "18:05 to 18:48",
-    score: 88,
-    hook: 87,
-    retention: 86,
-    share: 92,
-    banner: "STOP PAYING $49/MO TO CLIP",
-    bracketX: 436,
-    lines: [
-      ["You", "do", "not", "need", "a", "$49", "web", "editor."],
-      ["Paste", "the", "link", "and", "ship", "six", "clips", "fast."],
-    ],
-  },
-];
-
-const STYLE_META = {
-  karaoke: "Word pop",
-  boxed: "Dark pill",
-  classic: "Bold outline",
-  neon: "Neon glow",
-};
-
-let activeClipIndex = 0;
-let activeLineIndex = 0;
-let activeWordIndex = 0;
-let isPlaying = !prefersReducedMotion;
-let tickerId = null;
-
-const captionStage = document.getElementById("captionStage");
-const hookBanner = document.getElementById("hookBanner");
-const clipTimecode = document.getElementById("clipTimecode");
-const previewScoreVal = document.getElementById("previewScoreVal");
-const previewScoreBadge = document.getElementById("previewScoreBadge");
-const previewFrameImg = document.getElementById("previewFrameImg");
-const barHook = document.getElementById("barHook");
-const barRetention = document.getElementById("barRetention");
-const barShare = document.getElementById("barShare");
-const valHook = document.getElementById("valHook");
-const valRetention = document.getElementById("valRetention");
-const valShare = document.getElementById("valShare");
-const progressFill = document.getElementById("progressFill");
-const heatmapBracket = document.getElementById("heatmapBracket");
-const heatmapWrap = document.getElementById("heatmapWrap");
-const activeStyleMeta = document.getElementById("activeStyleMeta");
-const playbackToggle = document.getElementById("playbackToggle");
-const playbackLabel = document.getElementById("playbackLabel");
-
-const peakPills = Array.from(document.querySelectorAll(".peak-pills .seg-pill"));
-const peakDots = Array.from(document.querySelectorAll(".heatmap-pin"));
-const stylePills = Array.from(document.querySelectorAll(".style-pills .seg-pill"));
-
-function renderCaptionLine() {
-  if (!captionStage) return;
-  const clip = CLIPS[activeClipIndex];
-  const words = clip.lines[activeLineIndex];
-  const totalWords = clip.lines[0].length + clip.lines[1].length;
-  const absolutePos = (activeLineIndex === 0 ? 0 : clip.lines[0].length) + activeWordIndex + 1;
-
-  captionStage.innerHTML = "";
-  words.forEach((word, index) => {
-    const span = document.createElement("span");
-    span.className = index === activeWordIndex ? "cap-word is-active" : "cap-word";
-    span.textContent = word;
-    captionStage.appendChild(span);
-  });
-
-  if (progressFill) {
-    const pct = Math.max(8, Math.round((absolutePos / totalWords) * 100));
-    progressFill.style.width = `${pct}%`;
-  }
-}
-
-function applyClip(index, animateBump = true) {
-  activeClipIndex = index;
-  activeLineIndex = 0;
-  activeWordIndex = 0;
-  const clip = CLIPS[index];
-
-  if (hookBanner) hookBanner.textContent = clip.banner;
-  if (clipTimecode) clipTimecode.textContent = clip.timecode;
-  if (previewScoreVal) previewScoreVal.textContent = String(clip.score);
-
-  if (barHook) barHook.style.width = `${clip.hook}%`;
-  if (barRetention) barRetention.style.width = `${clip.retention}%`;
-  if (barShare) barShare.style.width = `${clip.share}%`;
-  if (valHook) valHook.textContent = String(clip.hook);
-  if (valRetention) valRetention.textContent = String(clip.retention);
-  if (valShare) valShare.textContent = String(clip.share);
-
-  if (heatmapBracket) {
-    heatmapBracket.setAttribute("x", String(clip.bracketX));
-  }
-
-  peakPills.forEach((pill, i) => {
-    const selected = i === index;
-    pill.classList.toggle("is-active", selected);
-    pill.setAttribute("aria-selected", String(selected));
-    pill.tabIndex = selected ? 0 : -1;
-  });
-
-  peakDots.forEach((dot, i) => {
-    const selected = i === index;
-    dot.classList.toggle("is-active", selected);
-    dot.setAttribute("aria-pressed", String(selected));
-  });
-
-  if (animateBump && previewScoreBadge && !prefersReducedMotion) {
-    previewScoreBadge.classList.remove("is-bump");
-    void previewScoreBadge.offsetWidth;
-    previewScoreBadge.classList.add("is-bump");
-    window.setTimeout(() => previewScoreBadge.classList.remove("is-bump"), 200);
-  }
-
-  renderCaptionLine();
-}
-
-function applyCaptionStyle(styleKey) {
-  if (!captionStage || !STYLE_META[styleKey]) return;
-  const wasOff = captionStage.classList.contains("is-off");
-  captionStage.className = `caption-stage style-${styleKey}${wasOff ? " is-off" : ""}`;
-
-  stylePills.forEach((pill) => {
-    const selected = pill.dataset.captionStyle === styleKey;
-    pill.classList.toggle("is-active", selected);
-    pill.setAttribute("aria-selected", String(selected));
-    pill.tabIndex = selected ? 0 : -1;
-  });
-
-  if (activeStyleMeta) {
-    activeStyleMeta.textContent = STYLE_META[styleKey];
-  }
-}
-
-function stepWord() {
-  const clip = CLIPS[activeClipIndex];
-  const currentLine = clip.lines[activeLineIndex];
-  activeWordIndex += 1;
-  if (activeWordIndex >= currentLine.length) {
-    activeWordIndex = 0;
-    activeLineIndex = (activeLineIndex + 1) % clip.lines.length;
-  }
-  renderCaptionLine();
-}
-
-function syncPlaybackUI() {
-  if (!playbackToggle) return;
-  const pauseIcon = playbackToggle.querySelector(".icon-pause");
-  const playIcon = playbackToggle.querySelector(".icon-play");
-  playbackToggle.setAttribute("aria-pressed", String(!isPlaying));
-  playbackToggle.setAttribute(
-    "aria-label",
-    isPlaying ? "Pause caption playback" : "Resume caption playback"
+if (!prefersReducedMotion && "IntersectionObserver" in window && rvNodes.length > 0) {
+  rvObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in");
+          rvObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15 }
   );
-  if (pauseIcon) pauseIcon.hidden = !isPlaying;
-  if (playIcon) playIcon.hidden = isPlaying;
-  if (playbackLabel) playbackLabel.textContent = isPlaying ? "Playing" : "Paused";
+  rvNodes.forEach((node) => rvObserver.observe(node));
+  window.addEventListener("scroll", sweepReveals, { passive: true });
+  sweepReveals();
+} else {
+  rvNodes.forEach((node) => node.classList.add("in"));
 }
 
-function startTicker() {
-  if (tickerId) window.clearInterval(tickerId);
-  if (!isPlaying) return;
-  tickerId = window.setInterval(stepWord, 620);
+// --------------------------------------------------------------------------
+// 9. Staged Goo Nav Entrance (Seal -> Pills grow outward -> Labels unblur)
+// --------------------------------------------------------------------------
+let navEntrancePlayed = false;
+
+function playNavEntrance() {
+  if (navEntrancePlayed || prefersReducedMotion || !mainNav) return;
+  navEntrancePlayed = true;
+
+  const seals = Array.from(mainNav.querySelectorAll(".n-seal"));
+  const pills = Array.from(mainNav.querySelectorAll(".n-links, .n-dl"));
+  const fgIns = Array.from(mainNav.querySelectorAll(".nav-fg .n-in"));
+
+  // Measure target pill widths before collapsing for outward growth
+  const measured = pills.map((el) => ({
+    el,
+    width: el.getBoundingClientRect().width,
+  }));
+
+  seals.forEach((el) => {
+    el.animate(
+      [
+        { opacity: 0, transform: "scale(0.2)" },
+        { opacity: 1, transform: "scale(1)" },
+      ],
+      {
+        duration: 700,
+        easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        fill: "backwards",
+      }
+    );
+  });
+
+  measured.forEach(({ el, width }) => {
+    if (width <= 0) return;
+    el.style.overflow = "hidden";
+    const anim = el.animate(
+      [
+        { width: "0px", paddingLeft: "0px", paddingRight: "0px", opacity: 0 },
+        { width: `${width}px`, paddingLeft: "6px", paddingRight: "6px", opacity: 1 },
+      ],
+      {
+        duration: 1050,
+        delay: 320,
+        easing: "cubic-bezier(0.34, 1.25, 0.64, 1)",
+        fill: "backwards",
+      }
+    );
+    anim.onfinish = () => {
+      el.style.overflow = "";
+    };
+  });
+
+  fgIns.forEach((el) => {
+    el.animate(
+      [
+        { opacity: 0, filter: "blur(8px)" },
+        { opacity: 1, filter: "blur(0px)" },
+      ],
+      {
+        duration: 600,
+        delay: 620,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        fill: "backwards",
+      }
+    );
+  });
 }
 
-function stopTicker() {
-  if (tickerId) {
-    window.clearInterval(tickerId);
-    tickerId = null;
+// --------------------------------------------------------------------------
+// 10. Font + Logo Loading Guard (html.fw -> release when fonts & 3D icon ready)
+// --------------------------------------------------------------------------
+const fwState = { fonts: false, logo: false };
+let fwReleased = !docEl.classList.contains("fw");
+
+function releaseFw() {
+  if (fwReleased) return;
+  fwReleased = true;
+  if (window.__clipviralFwTimer) {
+    window.clearTimeout(window.__clipviralFwTimer);
+    window.__clipviralFwTimer = null;
+  }
+  docEl.classList.remove("fw");
+  playNavEntrance();
+  if (icon3dController && typeof icon3dController.playEntrance === "function") {
+    icon3dController.playEntrance();
   }
 }
 
-peakPills.forEach((pill) => {
-  pill.addEventListener("click", () => {
-    const idx = Number(pill.dataset.clipIndex);
-    if (!Number.isNaN(idx)) applyClip(idx, true);
-  });
+function checkFw() {
+  if (fwState.fonts && fwState.logo) {
+    releaseFw();
+  }
+}
+
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+  fwState.fonts = true;
+  checkFw();
 });
 
-peakDots.forEach((dot) => {
-  dot.addEventListener("click", () => {
-    const idx = Number(dot.dataset.peakDot);
-    if (!Number.isNaN(idx)) applyClip(idx, true);
-  });
-});
-
-stylePills.forEach((pill) => {
-  pill.addEventListener("click", () => {
-    if (pill.dataset.captionStyle) {
-      applyCaptionStyle(pill.dataset.captionStyle);
+// Fallback if inline 4000ms timer removed html.fw while resources were slow
+if (!fwReleased && "MutationObserver" in window) {
+  const mo = new MutationObserver(() => {
+    if (!docEl.classList.contains("fw")) {
+      mo.disconnect();
+      if (!fwReleased) {
+        fwReleased = true;
+        playNavEntrance();
+      }
     }
   });
-});
-
-if (playbackToggle) {
-  playbackToggle.addEventListener("click", () => {
-    isPlaying = !isPlaying;
-    syncPlaybackUI();
-    if (isPlaying) startTicker();
-    else stopTicker();
-  });
+  mo.observe(docEl, { attributes: true, attributeFilter: ["class"] });
 }
-
-// Authentic 40x24 M3 Toggle Switches wired to live preview
-const swSponsor = document.getElementById("swSponsor");
-const swCaptions = document.getElementById("swCaptions");
-const swBanner = document.getElementById("swBanner");
-const swMirror = document.getElementById("swMirror");
-
-if (swSponsor && heatmapWrap) {
-  const syncSponsor = () => {
-    heatmapWrap.classList.toggle("is-sponsor-off", !swSponsor.checked);
-  };
-  swSponsor.addEventListener("change", syncSponsor);
-  syncSponsor();
-}
-
-if (swCaptions && captionStage) {
-  const syncCaptions = () => {
-    captionStage.classList.toggle("is-off", !swCaptions.checked);
-  };
-  swCaptions.addEventListener("change", syncCaptions);
-  syncCaptions();
-}
-
-if (swBanner && hookBanner) {
-  const syncBanner = () => {
-    hookBanner.classList.toggle("is-off", !swBanner.checked);
-  };
-  swBanner.addEventListener("change", syncBanner);
-  syncBanner();
-}
-
-if (swMirror && previewFrameImg) {
-  const syncMirror = () => {
-    previewFrameImg.classList.toggle("is-mirrored", swMirror.checked);
-  };
-  swMirror.addEventListener("change", syncMirror);
-  syncMirror();
-}
-
-applyClip(0, false);
-applyCaptionStyle("karaoke");
-syncPlaybackUI();
-startTicker();
-
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) stopTicker();
-  else if (isPlaying) startTicker();
-});
 
 // --------------------------------------------------------------------------
-// 4. Interactive Three.js 3D ClipViral Play-Button Icon
+// 11. Mount WebGL Corner Light Rays & Three.js r186 3D Play-Button Icon
 // --------------------------------------------------------------------------
-const icon3dCard = document.getElementById("icon3dCard");
+const heroSection = document.getElementById("top");
+const raysLeftCanvas = document.getElementById("raysLeft");
+const raysRightCanvas = document.getElementById("raysRight");
+raysController = initHeroRays(heroSection, raysLeftCanvas, raysRightCanvas);
+if (raysController) {
+  raysController.setTheme(currentTheme);
+}
+
 const icon3dStage = document.getElementById("icon3dStage");
-const icon3dHint = document.getElementById("icon3dHint");
-const playBurstBtn = document.getElementById("playBurstBtn");
-const resetViewBtn = document.getElementById("resetViewBtn");
-const burstStatus = document.getElementById("burstStatus");
-const burstStatusText = document.getElementById("burstStatusText");
-let burstBadgeTimer = null;
-
-function resetBurstChip() {
-  if (!burstStatus || !burstStatusText) return;
-  burstStatus.classList.remove("is-burst");
-  burstStatusText.textContent = "Interactive 3D icon";
-}
-
-function scheduleBurstChipReset(delayMs = 2000) {
-  if (burstBadgeTimer) window.clearTimeout(burstBadgeTimer);
-  burstBadgeTimer = window.setTimeout(resetBurstChip, delayMs);
-}
-
-function activateIconFallback() {
-  if (icon3dCard) icon3dCard.classList.add("is-fallback");
-  const fallback = icon3dStage ? icon3dStage.querySelector("[data-icon3d-fallback]") : null;
-  if (fallback) fallback.hidden = false;
-  if (burstStatusText) burstStatusText.textContent = "ClipViral app icon";
-  if (icon3dHint) icon3dHint.textContent = "ClipViral Android v3.0.1";
-}
-
-function handlePlayBurstFeedback() {
-  const score = CLIPS[activeClipIndex].score;
-  if (burstStatus && burstStatusText) {
-    burstStatus.classList.add("is-burst");
-    burstStatusText.textContent = `Playing clip · ${score} score`;
-    scheduleBurstChipReset(2000);
-  }
-  // Nudge live studio preview smoothly
-  if (!isPlaying) {
-    isPlaying = true;
-    syncPlaybackUI();
-    startTicker();
-  }
-  stepWord();
-}
-
-if (icon3dStage) {
-  icon3dStage.addEventListener("clipviral:burstfinished", () => {
-    if (burstStatus && burstStatus.classList.contains("is-burst")) {
-      scheduleBurstChipReset(900);
-    }
-  });
-}
 
 async function mountIcon3D() {
-  if (!icon3dStage) return;
+  if (!icon3dStage) {
+    fwState.logo = true;
+    checkFw();
+    return;
+  }
+
+  // Yield one paint frame before heavy Three.js setup so background & fonts never stall
+  await new Promise((resolve) => window.requestAnimationFrame(resolve));
+
   try {
     const mod = await import("./icon3d.js");
     icon3dController = mod.initClipViralIcon3D(icon3dStage, {
-      onBurst: handlePlayBurstFeedback,
+      deferEntrance: false,
+      onReady: () => {
+        fwState.logo = true;
+        checkFw();
+      },
     });
     if (icon3dController) {
-      icon3dController.setTheme(rootEl.getAttribute("data-theme") || "dark");
+      icon3dController.setTheme(currentTheme);
     } else {
-      activateIconFallback();
+      const fb = icon3dStage.querySelector("[data-icon3d-fallback]");
+      if (fb) fb.hidden = false;
+      fwState.logo = true;
+      checkFw();
     }
   } catch (_err) {
-    activateIconFallback();
+    const fb = icon3dStage.querySelector("[data-icon3d-fallback]");
+    if (fb) fb.hidden = false;
+    fwState.logo = true;
+    checkFw();
   }
 }
 
 mountIcon3D();
-
-if (playBurstBtn) {
-  playBurstBtn.addEventListener("click", () => {
-    if (icon3dController) {
-      icon3dController.triggerBurst();
-    } else {
-      handlePlayBurstFeedback();
-    }
-  });
-}
-
-if (resetViewBtn) {
-  resetViewBtn.addEventListener("click", () => {
-    if (icon3dController) {
-      icon3dController.resetView();
-    }
-  });
-}
-
-// --------------------------------------------------------------------------
-// 5. Keyboard Arrow Navigation on All Tablists
-// --------------------------------------------------------------------------
-function wireTablistKeyboard(selector) {
-  const buttons = Array.from(document.querySelectorAll(selector));
-  buttons.forEach((btn, idx) => {
-    btn.addEventListener("keydown", (event) => {
-      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-      event.preventDefault();
-      const delta = event.key === "ArrowRight" ? 1 : -1;
-      const next = buttons[(idx + delta + buttons.length) % buttons.length];
-      next.focus();
-      next.click();
-    });
-  });
-}
-
-wireTablistKeyboard(".peak-pills .seg-pill");
-wireTablistKeyboard(".style-pills .seg-pill");
-wireTablistKeyboard("[data-model]");
-wireTablistKeyboard("[data-tone]");
-wireTablistKeyboard(".currency-pill");
-
-// --------------------------------------------------------------------------
-// 6. AI Vision Models Selector
-// --------------------------------------------------------------------------
-const AI_MODELS = {
-  deepseek: {
-    provider: "Built-in · Auto-fallback ON",
-    spec: "1M context · Vision · Fast hook and retention reasoning",
-  },
-  glm: {
-    provider: "Built-in · Auto-fallback ON",
-    spec: "524K context · Vision · Fast highlight timestamps",
-  },
-  muse: {
-    provider: "Built-in · Auto-fallback ON",
-    spec: "524K context · Vision · Creative hooks and Studio copy",
-  },
-  toptools: {
-    provider: "Built-in · Pro Priority Tier",
-    spec: "1M context · Vision · High detail breakdown for long videos",
-  },
-  gemini: {
-    provider: "Optional API Key · Native Video",
-    spec: "Upload MP4 directly to Google Gemini 2.5 Flash",
-  },
-  custom: {
-    provider: "Custom OpenAI Endpoint",
-    spec: "Any OpenAI-compatible base URL, model ID, and fallback chain",
-  },
-};
-
-const modelTabs = Array.from(document.querySelectorAll("[data-model]"));
-const modelProvider = document.getElementById("modelProvider");
-const modelSpecLine = document.getElementById("modelSpecLine");
-
-modelTabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const key = tab.dataset.model;
-    const data = key ? AI_MODELS[key] : null;
-    if (!data) return;
-
-    modelTabs.forEach((t) => {
-      const selected = t === tab;
-      t.classList.toggle("is-active", selected);
-      t.setAttribute("aria-selected", String(selected));
-      t.tabIndex = selected ? 0 : -1;
-    });
-
-    if (modelProvider) modelProvider.textContent = data.provider;
-    if (modelSpecLine) modelSpecLine.textContent = data.spec;
-  });
-});
-
-// --------------------------------------------------------------------------
-// 7. Viral Studio 6-Tone Copy Previewer
-// --------------------------------------------------------------------------
-const TONES = {
-  viral: {
-    caption: '"Most creators lose viewers in two seconds. Start on the tension instead."',
-    tags: "#shortform #editingtips #creatorworkflow #android",
-  },
-  meme: {
-    caption: '"Waiting in a cloud render queue while my Android phone already exported three Reels."',
-    tags: "#videoeditor #contentcreator #reels #clipperlife",
-  },
-  tips: {
-    caption: '"Three steps: pull YouTube replay peaks, skip sponsor reads, burn Karaoke captions at 720p."',
-    tags: "#youtubetips #tiktokgrowth #mobileediting #shorts",
-  },
-  hottake: {
-    caption: '"Paying $49 a month for a web clipper makes little sense when your phone has a GPU."',
-    tags: "#creatoreconomy #podcastclips #hottake #shorts",
-  },
-  story: {
-    caption: '"Scrubbing a two-hour podcast used to take all evening. With heatmaps and Media3 it takes 90 seconds."',
-    tags: "#buildinpublic #podcasting #androidapp #creators",
-  },
-  minimal: {
-    caption: '"Long video in. Vertical clip out. Rendered locally."',
-    tags: "#clipviral #android #shortform",
-  },
-};
-
-const toneTabs = Array.from(document.querySelectorAll("[data-tone]"));
-const toneCaption = document.getElementById("toneCaption");
-const toneTags = document.getElementById("toneTags");
-
-toneTabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const key = tab.dataset.tone;
-    const data = key ? TONES[key] : null;
-    if (!data) return;
-
-    toneTabs.forEach((t) => {
-      const selected = t === tab;
-      t.classList.toggle("is-active", selected);
-      t.setAttribute("aria-selected", String(selected));
-      t.tabIndex = selected ? 0 : -1;
-    });
-
-    if (toneCaption) toneCaption.textContent = data.caption;
-    if (toneTags) toneTags.textContent = data.tags;
-  });
-});
-
-// --------------------------------------------------------------------------
-// 8. Pricing Currency Selector (Telegram @CryptoBot & @viralclibot)
-// --------------------------------------------------------------------------
-const CRYPTO_RAILS = {
-  USDT: "Pay in <strong>USDT</strong> (TRC-20, TON, or ERC-20) via <code>@CryptoBot</code> and <code>@viralclibot</code>.",
-  TON: "Pay in native <strong>TON</strong> via <code>@CryptoBot</code> and <code>@viralclibot</code> with fast settlement.",
-  USDC: "Pay in <strong>USDC</strong> stablecoin via <code>@CryptoBot</code> and <code>@viralclibot</code> with no credit card.",
-};
-
-const currencyPills = Array.from(document.querySelectorAll(".currency-pill"));
-const cryptoNote = document.getElementById("cryptoNote");
-
-currencyPills.forEach((pill) => {
-  pill.addEventListener("click", () => {
-    const asset = pill.dataset.asset;
-    if (!asset || !CRYPTO_RAILS[asset]) return;
-
-    currencyPills.forEach((p) => {
-      const selected = p === pill;
-      p.classList.toggle("is-active", selected);
-      p.setAttribute("aria-selected", String(selected));
-      p.tabIndex = selected ? 0 : -1;
-    });
-
-    if (cryptoNote) {
-      cryptoNote.innerHTML = CRYPTO_RAILS[asset];
-    }
-  });
-});
-
-// --------------------------------------------------------------------------
-// 9. Install Slide-Wrap Disclosure & SHA-256 Copy Button
-// --------------------------------------------------------------------------
-const toggleReleaseBtn = document.getElementById("toggleReleaseBtn");
-const toggleReleaseLabel = document.getElementById("toggleReleaseLabel");
-const releaseSlideWrap = document.getElementById("releaseSlideWrap");
-
-if (toggleReleaseBtn && releaseSlideWrap) {
-  toggleReleaseBtn.addEventListener("click", () => {
-    const isOpen = releaseSlideWrap.classList.toggle("is-open");
-    toggleReleaseBtn.setAttribute("aria-expanded", String(isOpen));
-    releaseSlideWrap.setAttribute("aria-hidden", String(!isOpen));
-    if (toggleReleaseLabel) {
-      toggleReleaseLabel.textContent = isOpen ? "Hide checksum" : "Show checksum";
-    }
-  });
-}
-
-const copyBtn = document.getElementById("copyShaBtn");
-const copyLabel = document.getElementById("copyShaLabel");
-const copyLive = document.getElementById("copyStatusLive");
-
-if (copyBtn) {
-  let resetTimer = null;
-
-  const showCopied = () => {
-    if (copyLabel) copyLabel.textContent = "Copied hash";
-    if (copyLive) copyLive.textContent = "SHA-256 checksum copied to clipboard.";
-    if (resetTimer) window.clearTimeout(resetTimer);
-    resetTimer = window.setTimeout(() => {
-      if (copyLabel) copyLabel.textContent = "Copy hash";
-      if (copyLive) copyLive.textContent = "";
-    }, 2200);
-  };
-
-  copyBtn.addEventListener("click", async () => {
-    const sha = copyBtn.dataset.sha || "";
-    if (!sha) return;
-
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(sha);
-        showCopied();
-        return;
-      }
-    } catch (_err) {
-      // Fallback below
-    }
-
-    const textarea = document.createElement("textarea");
-    textarea.value = sha;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.opacity = "0";
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand("copy");
-      showCopied();
-    } finally {
-      document.body.removeChild(textarea);
-    }
-  });
-}

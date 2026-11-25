@@ -2,12 +2,13 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 /**
- * Interactive Three.js r186 3D ClipViral Play-Button Icon
- * Follows the threejs-animation skill:
+ * Interactive Three.js r186 3D ClipViral Play-Button Icon (Iteration 3)
+ * Follows the threejs-animation skill strictly:
  * - THREE.Timer + timer.connect(document) + timer.update()
  * - renderer.setAnimationLoop(animate)
- * - THREE.AnimationMixer + AnimationClip + KeyframeTracks (idle + additive burst)
- * - Procedural pointer parallax & drag-to-orbit via THREE.MathUtils.damp AFTER mixer.update
+ * - THREE.AnimationMixer + AnimationClip + KeyframeTracks (idle + LoopOnce burst + additive spark)
+ * - Procedural pointer parallax, drag-to-orbit, entrance settle & scroll coupling via THREE.MathUtils.damp AFTER mixer.update
+ * - Precision-machined back-face recessed emblem so 360 spins & drags look complete from every angle
  * - RoomEnvironment reflections, IntersectionObserver pause, prefers-reduced-motion, WebGL fallback
  */
 
@@ -106,7 +107,6 @@ function createTaperedRibbonGeometry(curve, tubularSegments, maxRadius, radialSe
     const u = i / tubularSegments;
     curve.getPointAt(u, P);
 
-    // Smoothly taper both ends so the wave flows seamlessly inside the squircle edge
     const edgeFade = Math.sin(Math.pow(u, 0.85) * Math.PI);
     const r = maxRadius * (0.18 + 0.82 * Math.pow(edgeFade, 0.55));
 
@@ -125,7 +125,7 @@ function createTaperedRibbonGeometry(curve, tubularSegments, maxRadius, radialSe
 
       vertex.x = P.x + r * N.x;
       vertex.y = P.y + r * N.y;
-      vertex.z = P.z + r * 0.72 * N.z; // Slightly ribbon-flattened profile
+      vertex.z = P.z + r * 0.72 * N.z;
 
       positions.push(vertex.x, vertex.y, vertex.z);
       normals.push(N.x, N.y, N.z);
@@ -154,7 +154,6 @@ function createTaperedRibbonGeometry(curve, tubularSegments, maxRadius, radialSe
 }
 
 function createViralBurstShape() {
-  // Crisp jagged energy burst erupting top-right from play triangle shoulder
   const s = new THREE.Shape();
   s.moveTo(-0.34, -0.02);
   s.quadraticCurveTo(-0.15, 0.03, -0.06, 0.28);
@@ -238,7 +237,7 @@ function buildClipViralIconSculpture() {
   tileMesh.name = "SquircleTile";
   burstRig.add(tileMesh);
 
-  // Deep midnight-indigo interior plate with rich diagonal glass sheen & subtle radial glow
+  // Front deep midnight-indigo interior plate
   const backTex = makeCanvasTexture(512, 512, (ctx, w, h) => {
     const bg = ctx.createLinearGradient(0, 0, w, h);
     bg.addColorStop(0.0, "#1c0e45");
@@ -248,7 +247,6 @@ function buildClipViralIconSculpture() {
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, w, h);
 
-    // Subtle soft glowing aura behind the play button
     const aura = ctx.createRadialGradient(w * 0.46, h * 0.5, w * 0.06, w * 0.46, h * 0.5, w * 0.46);
     aura.addColorStop(0.0, "rgba(0, 216, 255, 0.22)");
     aura.addColorStop(0.45, "rgba(124, 58, 237, 0.20)");
@@ -256,7 +254,6 @@ function buildClipViralIconSculpture() {
     ctx.fillStyle = aura;
     ctx.fillRect(0, 0, w, h);
 
-    // Crisp diagonal crystal glass specular reflection across upper-left
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -288,7 +285,7 @@ function buildClipViralIconSculpture() {
   innerPlateMesh.position.z = 0.045;
   burstRig.add(innerPlateMesh);
 
-  // Glowing saturated gradient rim hugging the front bevel of the squircle
+  // Glowing saturated gradient rim hugging the front bevel
   const rimTex = makeCanvasTexture(512, 32, (ctx, w, h) => {
     const grad = ctx.createLinearGradient(0, 0, w, 0);
     grad.addColorStop(0.0, "#4F46E5");
@@ -316,7 +313,7 @@ function buildClipViralIconSculpture() {
   rimMesh.name = "SquircleRim";
   burstRig.add(rimMesh);
 
-  // Subtle recessed dark groove ring inside the tile
+  // Subtle recessed dark groove ring inside front tile
   const grooveShape = createRoundedRectPath(tileSize - 0.42, tileSize - 0.42, tileRadius - 0.11);
   const grooveHole = createRoundedRectPath(tileSize - 0.52, tileSize - 0.52, tileRadius - 0.13);
   grooveShape.holes.push(grooveHole);
@@ -329,6 +326,113 @@ function buildClipViralIconSculpture() {
   const grooveMesh = new THREE.Mesh(grooveGeom, grooveMat);
   grooveMesh.position.z = 0.21;
   burstRig.add(grooveMesh);
+
+  // --------------------------------------------------------------------------
+  // 1B. Precision-Machined Back-Face Recessed Emblem (visible on 360 spin/orbit)
+  // --------------------------------------------------------------------------
+  const backFaceGroup = new THREE.Group();
+  backFaceGroup.name = "BackFaceGroup";
+  backFaceGroup.rotation.y = Math.PI;
+  burstRig.add(backFaceGroup);
+
+  const rearPlateTex = makeCanvasTexture(512, 512, (ctx, w, h) => {
+    const rad = ctx.createRadialGradient(w * 0.5, h * 0.48, w * 0.05, w * 0.5, h * 0.5, w * 0.65);
+    rad.addColorStop(0.0, "#1c2248");
+    rad.addColorStop(0.55, "#111530");
+    rad.addColorStop(1.0, "#090c1f");
+    ctx.fillStyle = rad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Subtle concentric brushed-hardware circular rings
+    ctx.strokeStyle = "rgba(185, 195, 255, 0.055)";
+    ctx.lineWidth = 1.5;
+    for (let r = 56; r < 230; r += 26) {
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.5, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  });
+
+  const rearPlateMat = new THREE.MeshStandardMaterial({
+    map: rearPlateTex,
+    emissive: new THREE.Color(0x161c3d),
+    emissiveIntensity: 0.25,
+    roughness: 0.28,
+    metalness: 0.58,
+  });
+  const rearPlateMesh = new THREE.Mesh(innerPlateGeom, rearPlateMat);
+  rearPlateMesh.position.z = 0.222;
+  backFaceGroup.add(rearPlateMesh);
+
+  // Subtle rear mirrored rim hugging the back bevel
+  const rearRimCurve = buildPerimeterCurve(tileSize - 0.06, tileSize - 0.06, tileRadius - 0.02, 0.205);
+  const rearRimGeom = new THREE.TubeGeometry(rearRimCurve, 120, 0.024, 12, true);
+  const rearRimMat = new THREE.MeshStandardMaterial({
+    map: rimTex,
+    emissive: new THREE.Color(0xffffff),
+    emissiveMap: rimTex,
+    emissiveIntensity: 0.34,
+    roughness: 0.22,
+    metalness: 0.42,
+  });
+  const rearRimMesh = new THREE.Mesh(rearRimGeom, rearRimMat);
+  backFaceGroup.add(rearRimMesh);
+
+  // Brushed anodized circular hardware recess ring on back face
+  const backRingGeom = new THREE.TorusGeometry(0.68, 0.018, 12, 64);
+  const backMetalMat = new THREE.MeshStandardMaterial({
+    color: 0xcbd5f5,
+    emissive: new THREE.Color(0x6366f1),
+    emissiveIntensity: 0.28,
+    roughness: 0.22,
+    metalness: 0.78,
+  });
+  const backRingMesh = new THREE.Mesh(backRingGeom, backMetalMat);
+  backRingMesh.position.set(0, 0.04, 0.232);
+  backFaceGroup.add(backRingMesh);
+
+  // Machined hollow play-chevron emblem on back face
+  const backOuterPts = [
+    new THREE.Vector2(-0.30, 0.36),
+    new THREE.Vector2(0.38, 0.0),
+    new THREE.Vector2(-0.30, -0.36),
+  ];
+  const backInnerPts = [
+    new THREE.Vector2(-0.15, 0.16),
+    new THREE.Vector2(0.15, 0.0),
+    new THREE.Vector2(-0.15, -0.16),
+  ];
+  const backPlayShape = createRoundedPolygonPath(backOuterPts, 0.10, false);
+  backPlayShape.holes.push(createRoundedPolygonPath(backInnerPts, 0.045, true));
+  const backPlayGeom = new THREE.ExtrudeGeometry(backPlayShape, {
+    depth: 0.042,
+    bevelEnabled: true,
+    bevelThickness: 0.014,
+    bevelSize: 0.012,
+    bevelSegments: 4,
+    curveSegments: 18,
+  });
+  backPlayGeom.center();
+  applyPlanarUVs(backPlayGeom);
+
+  const backPlayMat = new THREE.MeshPhysicalMaterial({
+    color: 0xdbeafe,
+    emissive: new THREE.Color(0x38bdf8),
+    emissiveIntensity: 0.32,
+    roughness: 0.2,
+    metalness: 0.72,
+    clearcoat: 0.9,
+  });
+  const backPlayMesh = new THREE.Mesh(backPlayGeom, backPlayMat);
+  backPlayMesh.position.set(-0.02, 0.04, 0.25);
+  backFaceGroup.add(backPlayMesh);
+
+  // Precision-machined lower status bars on back face
+  const ventBarGeom = new THREE.CapsuleGeometry(0.014, 0.26, 6, 10);
+  ventBarGeom.rotateZ(Math.PI / 2);
+  const ventBar = new THREE.Mesh(ventBarGeom, backMetalMat);
+  ventBar.position.set(0, -0.86, 0.236);
+  backFaceGroup.add(ventBar);
 
   // --------------------------------------------------------------------------
   // 2. Hero 3D Sculpted Play Triangle with Hollow Inner Triangle Cutout
@@ -365,7 +469,6 @@ function buildClipViralIconSculpture() {
   applyPlanarUVs(playGeom);
 
   const playTex = makeCanvasTexture(512, 512, (ctx, w, h) => {
-    // Rich saturated royal-violet -> electric-cobalt -> vibrant cyan (matching app-icon.png)
     const grad = ctx.createLinearGradient(0, h * 0.85, w, h * 0.18);
     grad.addColorStop(0.0, "#7C1EFF");
     grad.addColorStop(0.24, "#6D28D9");
@@ -375,14 +478,12 @@ function buildClipViralIconSculpture() {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    // Vivid violet-magenta edge luminance along left spine
     const leftEdge = ctx.createLinearGradient(0, 0, w * 0.3, 0);
     leftEdge.addColorStop(0.0, "rgba(236, 72, 232, 0.52)");
     leftEdge.addColorStop(1.0, "rgba(236, 72, 232, 0)");
     ctx.fillStyle = leftEdge;
     ctx.fillRect(0, 0, w * 0.32, h);
 
-    // Subtle crisp glass facet gloss across top-left
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -597,11 +698,13 @@ function buildClipViralIconSculpture() {
       playMat,
       sparkMat,
       rimMat,
+      rearRimMat,
+      backPlayMat,
       cyanRibbonMat,
       magentaRibbonMat,
       tileGlassMat,
     },
-    textures: [backTex, rimTex, playTex, sparkTex, cyanRibbonTex, magentaRibbonTex],
+    textures: [backTex, rearPlateTex, rimTex, playTex, sparkTex, cyanRibbonTex, magentaRibbonTex],
   };
 }
 
@@ -731,11 +834,33 @@ function buildAnimationClips() {
   return { idleClip, playBurstClip, sparkBurstClip };
 }
 
+function isWebGLAvailable() {
+  try {
+    const testCanvas = document.createElement("canvas");
+    const gl =
+      testCanvas.getContext("webgl2") ||
+      testCanvas.getContext("webgl") ||
+      testCanvas.getContext("experimental-webgl");
+    if (!gl) return false;
+    const lose = gl.getExtension("WEBGL_lose_context");
+    if (lose) lose.loseContext();
+    return true;
+  } catch (_err) {
+    return false;
+  }
+}
+
 export function initClipViralIcon3D(stageEl, options = {}) {
   if (!stageEl) return null;
 
   const fallbackEl = stageEl.querySelector("[data-icon3d-fallback]");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Pre-probe WebGL before constructing THREE.WebGLRenderer so disabled-WebGL logs 0 errors
+  if (!isWebGLAvailable()) {
+    if (fallbackEl) fallbackEl.hidden = false;
+    return null;
+  }
 
   let renderer;
   try {
@@ -774,10 +899,14 @@ export function initClipViralIcon3D(stageEl, options = {}) {
   scene.environmentIntensity = 0.72;
   pmremGenerator.dispose();
 
-  // Balanced saturated studio lighting (preserves deep violet/cyan/magenta jewel tones)
+  // Balanced studio lighting (front + subtle rear accent so back-face emblem shines on spin/orbit)
   const keyLight = new THREE.DirectionalLight(0xffffff, 1.15);
   keyLight.position.set(3.2, 4.4, 5.2);
   scene.add(keyLight);
+
+  const rearFillLight = new THREE.DirectionalLight(0xc7d2fe, 0.75);
+  rearFillLight.position.set(-2.5, 2.2, -4.5);
+  scene.add(rearFillLight);
 
   const fillHemi = new THREE.HemisphereLight(0xc7d2fe, 0x1e1b4b, 0.65);
   scene.add(fillHemi);
@@ -820,24 +949,30 @@ export function initClipViralIcon3D(stageEl, options = {}) {
     idleAction.play();
   }
 
-  // Sizing via ResizeObserver
-  function updateSize() {
-    const rect = stageEl.getBoundingClientRect();
-    const w = Math.max(1, Math.round(rect.width));
-    const h = Math.max(1, Math.round(rect.height));
+  // Sizing via ResizeObserver using layout dimensions (clientWidth/clientHeight / contentRect)
+  // so CSS entrance transforms (scale/rotate on .logo-tilt) never shrink the drawing buffer.
+  function updateSize(entries) {
+    const entry = Array.isArray(entries) ? entries[0] : null;
+    const rawW = entry && entry.contentRect ? entry.contentRect.width : stageEl.clientWidth;
+    const rawH = entry && entry.contentRect ? entry.contentRect.height : stageEl.clientHeight;
+    const w = Math.max(1, Math.round(rawW || stageEl.offsetWidth || 320));
+    const h = Math.max(1, Math.round(rawH || stageEl.offsetHeight || 320));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const minSideRatio = Math.min(1, w / Math.max(1, h));
-    camera.position.z = minSideRatio < 0.85 ? 6.8 : 6.1;
+    camera.position.z = minSideRatio < 0.85 ? 5.65 : 5.05;
     camera.updateProjectionMatrix();
+    if (prefersReducedMotion) {
+      renderer.render(scene, camera);
+    }
   }
 
-  const resizeObserver = new ResizeObserver(updateSize);
+  const resizeObserver = new ResizeObserver((entries) => updateSize(entries));
   resizeObserver.observe(stageEl);
   updateSize();
 
-  // Procedural pointer parallax + drag-to-orbit state (applied AFTER mixer.update)
+  // Procedural state (applied AFTER mixer.update via THREE.MathUtils.damp)
   const HERO_ROT_X = 0.08;
   const HERO_ROT_Y = -0.18;
 
@@ -857,6 +992,29 @@ export function initClipViralIcon3D(stageEl, options = {}) {
   let currentRotY = HERO_ROT_Y;
   let currentPlayZ = 0.28;
   let burstFlash = 0;
+
+  // Entrance settle & scroll-coupled motion state
+  const useEntrance = Boolean(options.deferEntrance) && !prefersReducedMotion;
+  let targetEntranceScale = useEntrance ? 0.86 : 1.0;
+  let currentEntranceScale = targetEntranceScale;
+  let targetEntranceYaw = useEntrance ? -0.45 : 0;
+  let currentEntranceYaw = targetEntranceYaw;
+
+  let targetScrollProgress = 0;
+  let currentScrollProgress = 0;
+
+  function playEntrance() {
+    targetEntranceScale = 1.0;
+    targetEntranceYaw = 0;
+  }
+
+  function setScrollProgress(p) {
+    if (prefersReducedMotion) {
+      targetScrollProgress = 0;
+      return;
+    }
+    targetScrollProgress = THREE.MathUtils.clamp(Number(p) || 0, 0, 1);
+  }
 
   function triggerBurst() {
     burstFlash = 1.0;
@@ -879,8 +1037,11 @@ export function initClipViralIcon3D(stageEl, options = {}) {
 
   function setTheme(theme) {
     const isLight = theme === "light";
-    renderer.toneMappingExposure = isLight ? 0.98 : 1.04;
-    fillHemi.intensity = isLight ? 0.72 : 0.65;
+    renderer.toneMappingExposure = isLight ? 0.99 : 1.05;
+    fillHemi.intensity = isLight ? 0.74 : 0.66;
+    if (prefersReducedMotion) {
+      renderer.render(scene, camera);
+    }
   }
 
   // Pointer interactions (hover parallax, drag-to-orbit, tap/click play burst)
@@ -958,13 +1119,24 @@ export function initClipViralIcon3D(stageEl, options = {}) {
     mixer.update(delta);
 
     // 2. Procedural motion runs AFTER mixer.update via THREE.MathUtils.damp
-    const goalRotX = dragRotX + (isDragging ? 0 : targetHoverX);
-    const goalRotY = dragRotY + (isDragging ? 0 : targetHoverY);
+    currentEntranceScale = THREE.MathUtils.damp(currentEntranceScale, targetEntranceScale, 5.2, delta);
+    currentEntranceYaw = THREE.MathUtils.damp(currentEntranceYaw, targetEntranceYaw, 5.0, delta);
+    currentScrollProgress = THREE.MathUtils.damp(currentScrollProgress, targetScrollProgress, 6.0, delta);
+
+    const scrollYaw = currentScrollProgress * 0.42;
+    const scrollPitch = currentScrollProgress * 0.12;
+    const scrollY = currentScrollProgress * 0.12;
+
+    const goalRotX = dragRotX + scrollPitch + (isDragging ? 0 : targetHoverX);
+    const goalRotY = dragRotY + currentEntranceYaw + scrollYaw + (isDragging ? 0 : targetHoverY);
     const rotLambda = isDragging ? 18 : 6.5;
 
     currentRotX = THREE.MathUtils.damp(currentRotX, goalRotX, rotLambda, delta);
     currentRotY = THREE.MathUtils.damp(currentRotY, goalRotY, rotLambda, delta);
+
     rig.orbitPivot.rotation.set(currentRotX, currentRotY, 0);
+    rig.orbitPivot.position.y = scrollY;
+    rig.orbitPivot.scale.setScalar(currentEntranceScale);
 
     // Tactile hover lift on the sculpted Play Triangle
     const playTargetZ = isHovering ? 0.36 : 0.28;
@@ -977,6 +1149,8 @@ export function initClipViralIcon3D(stageEl, options = {}) {
     rig.materials.playMat.emissiveIntensity = 0.34 + hoverBoost + burstFlash * 0.52;
     rig.materials.sparkMat.emissiveIntensity = 0.44 + hoverBoost * 0.5 + burstFlash * 0.65;
     rig.materials.rimMat.emissiveIntensity = 0.56 + hoverBoost * 0.4 + burstFlash * 0.45;
+    rig.materials.rearRimMat.emissiveIntensity = 0.34 + burstFlash * 0.4;
+    rig.materials.backPlayMat.emissiveIntensity = 0.32 + burstFlash * 0.42;
     rig.materials.cyanRibbonMat.emissiveIntensity = 0.44 + burstFlash * 0.48;
     rig.materials.magentaRibbonMat.emissiveIntensity = 0.44 + burstFlash * 0.48;
 
@@ -993,12 +1167,12 @@ export function initClipViralIcon3D(stageEl, options = {}) {
     renderer.render(scene, camera);
   }
 
-  // Pause animation & WebGL rendering when scrolled offscreen
+  // Pause animation & WebGL rendering when scrolled offscreen (or permanently under reduced motion)
   const intersectionObserver = new IntersectionObserver(
     (entries) => {
       const entry = entries[0];
       isVisible = Boolean(entry && entry.isIntersecting);
-      renderer.setAnimationLoop(isVisible ? animate : null);
+      renderer.setAnimationLoop(isVisible && !prefersReducedMotion ? animate : null);
     },
     { threshold: 0.02 }
   );
@@ -1008,14 +1182,32 @@ export function initClipViralIcon3D(stageEl, options = {}) {
   if (fallbackEl) fallbackEl.hidden = true;
   timer.update();
   mixer.update(0);
-  rig.orbitPivot.rotation.set(HERO_ROT_X, HERO_ROT_Y, 0);
+  rig.orbitPivot.rotation.set(HERO_ROT_X, HERO_ROT_Y + currentEntranceYaw, 0);
+  rig.orbitPivot.scale.setScalar(currentEntranceScale);
   renderer.render(scene, camera);
-  renderer.setAnimationLoop(animate);
+  if (!prefersReducedMotion) {
+    renderer.setAnimationLoop(animate);
+  }
+
+  if (typeof options.onReady === "function") {
+    options.onReady();
+  }
 
   return {
     triggerBurst,
     resetView,
+    playEntrance,
+    setScrollProgress,
     setTheme,
+    // Expose deterministic angle helper for inspecting rear hardware emblem during QA
+    setOrbitAngle(rx, ry) {
+      dragRotX = rx;
+      dragRotY = ry;
+      currentRotX = rx;
+      currentRotY = ry;
+      rig.orbitPivot.rotation.set(rx, ry, 0);
+      renderer.render(scene, camera);
+    },
     dispose() {
       renderer.setAnimationLoop(null);
       intersectionObserver.disconnect();
