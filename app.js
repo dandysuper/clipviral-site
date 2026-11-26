@@ -9,7 +9,7 @@ import { initHeroRays } from "./rays.js";
 
 const APK_URL = "https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk";
 const PRO_BOT_URL = "https://t.me/viralclibot";
-const APK_SHA256 = "7ba12d2bc0f807e1edb3b76312931239f05636c91a7a3018bef5f80a8c18196f";
+const APK_SHA256 = "1053d39767140d9740489239830b22dc185830f39099e46819c775a0726c9436";
 
 const docEl = document.documentElement;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -34,15 +34,15 @@ const COPY = {
     engineLead: "Built to cut, caption, and post straight from your phone.",
     abTitle: "What the engine handles",
     howTitle: "How to install",
-    pricingTitle: "Free and Pro",
+    pricingTitle: "ClipViral Pro",
     pricingText:
-      "Free gives 3 AI analyses a day at 360p and 480p with Instant YT Peaks. Pro via @CryptoBot removes limits and unlocks 720p, Karaoke/Neon, and Live Capture: $1.69 weekly, $4.29 monthly, $12.99 lifetime.",
+      "Connect via @viralclibot and unlock full access with @CryptoBot (USDT, TON, USDC): unlimited AI clips, 720p, Karaoke/Neon, and Live Capture. $1.69 weekly, $4.29 monthly, $12.99 lifetime.",
     modelsTitle: "Presets and models",
     modelsText:
       "Six built-in vision models work without keys. Plug in Gemini 2.5 Flash or any OpenAI endpoint, or switch render presets in one tap.",
     codeNote: "// Preset: Hormozi Reel · Media3 GPU",
     dlTitle: "Android 8.0+",
-    dlOpt0: "APK v3.0.2",
+    dlOpt0: "APK v4.0.0",
     dlOpt1: "Pro Bot",
     dlCta0: "Download ClipViral.apk",
     dlCta1: "Open @viralclibot",
@@ -77,7 +77,7 @@ const COPY = {
       { icon: "abPro", title: "Telegram Pro unlock", body: "Links via @viralclibot with instant USDT, TON, or USDC checkout." },
     ],
     steps: [
-      { title: "Download ClipViral.apk", body: "21 MB signed build for Android 8.0 and newer." },
+      { title: "Download ClipViral.apk", body: "4.1 MB signed release build for Android 8.0 and newer." },
       { title: "Allow unknown apps", body: "Tap the file once and confirm install in Android settings." },
       { title: "Paste any link", body: "Pick a YouTube URL, live stream, or local video and export." },
     ],
@@ -98,15 +98,15 @@ const COPY = {
     engineLead: "Режет, титрует и публикует прямо с телефона.",
     abTitle: "Что берёт на себя движок",
     howTitle: "Как поставить",
-    pricingTitle: "Free и Pro",
+    pricingTitle: "ClipViral Pro",
     pricingText:
-      "Free даёт 3 AI-анализа в день в 360p и 480p с картой повторов YouTube. Pro через @CryptoBot снимает лимиты и открывает 720p, Караоке/Неон и захват стримов: $1.69 в неделю, $4.29 в месяц, $12.99 навсегда.",
+      "Подключи @viralclibot и открой полный доступ через @CryptoBot (USDT, TON, USDC): безлимитные AI-клипы, 720p, Караоке/Неон и захват стримов. $1.69 в неделю, $4.29 в месяц, $12.99 навсегда.",
     modelsTitle: "Пресеты и модели",
     modelsText:
       "Шесть встроенных vision-моделей работают без ключей. Подключай Gemini 2.5 Flash или любой OpenAI-эндпоинт и меняй пресеты рендера в одно касание.",
     codeNote: "// Пресет: Hormozi Reel · Media3 GPU",
     dlTitle: "Android 8.0+",
-    dlOpt0: "APK v3.0.2",
+    dlOpt0: "APK v4.0.0",
     dlOpt1: "Pro-бот",
     dlCta0: "Скачать ClipViral.apk",
     dlCta1: "Открыть @viralclibot",
@@ -141,7 +141,7 @@ const COPY = {
       { icon: "abPro", title: "Pro через Telegram", body: "Привязка через @viralclibot с оплатой в USDT, TON или USDC." },
     ],
     steps: [
-      { title: "Скачай ClipViral.apk", body: "Подписанная сборка 21 MB для Android 8.0 и выше." },
+      { title: "Скачай ClipViral.apk", body: "Подписанная релизная сборка 4.1 MB для Android 8.0 и выше." },
       { title: "Разреши установку", body: "Открой файл один раз и подтверди установку в настройках Android." },
       { title: "Вставь любую ссылку", body: "Выбери ролик YouTube, стрим или видео с телефона и экспортируй." },
     ],
