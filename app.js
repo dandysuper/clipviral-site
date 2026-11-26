@@ -9,7 +9,7 @@ import { initHeroRays } from "./rays.js";
 
 const APK_URL = "https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk";
 const PRO_BOT_URL = "https://t.me/viralclibot";
-const APK_SHA256 = "1053d39767140d9740489239830b22dc185830f39099e46819c775a0726c9436";
+const APK_SHA256 = "08e229e654ed02917b585674d69a77a6a2816906f916c758b6d12ed808991c3e";
 
 const docEl = document.documentElement;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -42,7 +42,7 @@ const COPY = {
       "Six built-in vision models work without keys. Plug in Gemini 2.5 Flash or any OpenAI endpoint, or switch render presets in one tap.",
     codeNote: "// Preset: Hormozi Reel · Media3 GPU",
     dlTitle: "Android 8.0+",
-    dlOpt0: "APK v4.0.0",
+    dlOpt0: "APK v4.1.0",
     dlOpt1: "Pro Bot",
     dlCta0: "Download ClipViral.apk",
     dlCta1: "Open @viralclibot",
@@ -106,7 +106,7 @@ const COPY = {
       "Шесть встроенных vision-моделей работают без ключей. Подключай Gemini 2.5 Flash или любой OpenAI-эндпоинт и меняй пресеты рендера в одно касание.",
     codeNote: "// Пресет: Hormozi Reel · Media3 GPU",
     dlTitle: "Android 8.0+",
-    dlOpt0: "APK v4.0.0",
+    dlOpt0: "APK v4.1.0",
     dlOpt1: "Pro-бот",
     dlCta0: "Скачать ClipViral.apk",
     dlCta1: "Открыть @viralclibot",
