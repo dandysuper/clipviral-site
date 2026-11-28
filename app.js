@@ -9,7 +9,7 @@ import { initHeroRays } from "./rays.js";
 
 const APK_URL = "https://github.com/dandysuper/clipviral-site/releases/latest/download/ClipViral.apk";
 const PRO_BOT_URL = "https://t.me/viralclibot";
-const APK_SHA256 = "08e229e654ed02917b585674d69a77a6a2816906f916c758b6d12ed808991c3e";
+const APK_SHA256 = "542ecb9ac194171af9d683b7de1d8dd4074df673ea7c6facd6ec18c03ae2e287";
 
 const docEl = document.documentElement;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -42,7 +42,7 @@ const COPY = {
       "Six built-in vision models work without keys. Plug in Gemini 2.5 Flash or any OpenAI endpoint, or switch render presets in one tap.",
     codeNote: "// Preset: Hormozi Reel · Media3 GPU",
     dlTitle: "Android 8.0+",
-    dlOpt0: "APK v4.1.0",
+    dlOpt0: "APK v4.5.0",
     dlOpt1: "Pro Bot",
     dlCta0: "Download ClipViral.apk",
     dlCta1: "Open @viralclibot",
@@ -77,7 +77,7 @@ const COPY = {
       { icon: "abPro", title: "Telegram Pro unlock", body: "Links via @viralclibot with instant USDT, TON, or USDC checkout." },
     ],
     steps: [
-      { title: "Download ClipViral.apk", body: "4.1 MB signed release build for Android 8.0 and newer." },
+      { title: "Download ClipViral.apk", body: "4.2 MB signed release build for Android 8.0 and newer." },
       { title: "Allow unknown apps", body: "Tap the file once and confirm install in Android settings." },
       { title: "Paste any link", body: "Pick a YouTube URL, live stream, or local video and export." },
     ],
@@ -106,7 +106,7 @@ const COPY = {
       "Шесть встроенных vision-моделей работают без ключей. Подключай Gemini 2.5 Flash или любой OpenAI-эндпоинт и меняй пресеты рендера в одно касание.",
     codeNote: "// Пресет: Hormozi Reel · Media3 GPU",
     dlTitle: "Android 8.0+",
-    dlOpt0: "APK v4.1.0",
+    dlOpt0: "APK v4.5.0",
     dlOpt1: "Pro-бот",
     dlCta0: "Скачать ClipViral.apk",
     dlCta1: "Открыть @viralclibot",
@@ -141,7 +141,7 @@ const COPY = {
       { icon: "abPro", title: "Pro через Telegram", body: "Привязка через @viralclibot с оплатой в USDT, TON или USDC." },
     ],
     steps: [
-      { title: "Скачай ClipViral.apk", body: "Подписанная релизная сборка 4.1 MB для Android 8.0 и выше." },
+      { title: "Скачай ClipViral.apk", body: "Подписанная релизная сборка 4.2 MB для Android 8.0 и выше." },
       { title: "Разреши установку", body: "Открой файл один раз и подтверди установку в настройках Android." },
       { title: "Вставь любую ссылку", body: "Выбери ролик YouTube, стрим или видео с телефона и экспортируй." },
     ],
